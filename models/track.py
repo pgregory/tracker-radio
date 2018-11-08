@@ -6,7 +6,7 @@ class Track(ndb.Model):
     created_at = ndb.DateTimeProperty(auto_now_add=True)
     updated_at = ndb.DateTimeProperty(auto_now=True)
     title = ndb.StringProperty(indexed=True)
-    location = ndb.StringProperty(indexed=False)
+    location = ndb.StringProperty(indexed=True)
     artist = ndb.KeyProperty(kind="Artist")
     coop = ndb.KeyProperty(kind="Artist", repeated=True)
 

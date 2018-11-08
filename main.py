@@ -82,7 +82,12 @@ def post_artists():
     schema = ArtistSchema(many=True)
     result = schema.load(request.json)
     for artist in result.data:
-        artist.put()
+        existing = Artist.query(Artist.name == artist.name).fetch(1)
+        if existing:
+            existing[0].populate(**artist.to_dict())
+            existing[0].put()
+        else:
+            artist.put()
     return jsonify({'success': True}), 201
 
 @app.route('/api/artists/<int:artist_id>', methods=['GET'])
@@ -115,5 +120,10 @@ def post_tracks():
     schema = TrackSchema(many=True)
     result = schema.load(request.json)
     for track in result.data:
-        track.put()
+        existing = Track.query(Track.location == track.location).fetch(1)
+        if existing:
+            existing[0].populate(**track.to_dict())
+            existing[0].put()
+        else:
+            track.put()
     return jsonify({'success': True}), 201
