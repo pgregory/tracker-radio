@@ -67,8 +67,12 @@ def catch_all(path):
 
 @app.route('/api/artists', methods=['GET'])
 def get_artists():
+    letter = request.args.get('letter', 'A')
     schema = ArtistSchema(many=True)
-    artists = Artist.query().filter(Artist.name >= 'A').filter(Artist.name <= 'A' + u'\ufffd').order(Artist.name).fetch()
+    if letter == '0-9':
+        artists = Artist.query().filter(Artist.name < 'A').order(Artist.name).fetch()
+    else:
+        artists = Artist.query().filter(Artist.name >= letter).filter(Artist.name <= letter + u'\ufffd').order(Artist.name).fetch()
     return schema.dumps(artists)
 
 @app.route('/api/artists', methods=['POST'])

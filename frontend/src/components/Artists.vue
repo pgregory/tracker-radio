@@ -4,7 +4,12 @@
   <div id="content">
     <b-container id="artists">
       <p>Artists</p>
-      <b-row>
+      <b-row class="letters">
+        <b-col class="letter" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
+          <span>{{ letter }}</span>
+        </b-col>
+      </b-row>
+      <b-row class="artists">
         <b-col class="artist" v-for="artist in artists" v-bind:key="artist.id">
           <div class="dummy"></div>
           <artist v-bind:artist="artist" v-on:artist-selected="updateArtistTracks(artist.id)"/>
@@ -29,7 +34,7 @@
             {{ data.item.artist[0].name }}
           </template>
           <template slot="location" slot-scope="data">
-            <a :href="getTrackLocation(data.item)">Play</a>
+            <a :href="getTrackLocation(data.item)" target="_blank">Play</a>
           </template>
         </b-table>
       </b-container>
@@ -47,13 +52,19 @@ export default {
       artists: [],
       tracks: [],
       artist_id: '',
-      track_fields: [ 'title', 'artist', 'coop', 'location' ]
+      track_fields: [ 'title', 'artist', 'coop', 'location' ],
+      letters: ['0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      letter: 'A'
     }
   },
   methods: {
     getArtistsFromBackend () {
       const path = process.env.API_BASE_URL + `api/artists`
-      axios.get(path)
+      axios.get(path, {
+        params: {
+          letter: this.letter
+        }
+      })
         .then(response => {
           this.artists = response.data
         })
@@ -62,6 +73,8 @@ export default {
         })
     },
     getArtists () {
+      this.artists = []
+      this.tracks = []
       this.getArtistsFromBackend()
     },
     getArtistTracksFromBackend () {
@@ -77,6 +90,7 @@ export default {
       }
     },
     getArtistTracks () {
+      this.tracks = []
       this.getArtistTracksFromBackend()
     },
     updateArtistTracks (artistId) {
@@ -87,6 +101,10 @@ export default {
       const playerRoot = 'http://app.wetracker.xyz/#/loadsong?play=1&url='
       var url = encodeURI('https://modland.ziphoid.com/pub/modules/Fasttracker 2/' + track.location)
       return playerRoot + url
+    },
+    selectLetter (letter) {
+      this.letter = letter
+      this.getArtists()
     }
   },
   components: {
@@ -112,9 +130,11 @@ export default {
   flex: none;
 }
 #artists .row {
-  min-height: 200px;
   overflow-x: auto;
   flex-wrap: nowrap;
+}
+#artists .row.artists {
+  min-height: 200px;
 }
 .artist {
   min-width: 200px;
@@ -147,5 +167,20 @@ export default {
   -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
   box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
   margin-bottom: 15px;
+}
+.letter {
+  border: 1px solid black;
+  min-width: 0;
+  height: 100%;
+  flex-basis: auto;
+  border-radius: 5px;
+  -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  padding-right: 0;
+  padding-left: 0;
+}
+.letter span {
+  white-space: nowrap;
 }
 </style>
