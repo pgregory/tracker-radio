@@ -1,0 +1,5 @@
+Flask-Cors
+marshmallow
+requests
+requests-toolbelt
+google-auth
