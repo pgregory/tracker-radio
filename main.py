@@ -121,9 +121,9 @@ def post_tracks():
     result = schema.load(request.json)
     for track in result.data:
         existing = Track.query(Track.location == track.location).fetch(1)
-        if existing:
-            existing[0].populate(**track.to_dict())
-            existing[0].put()
-        else:
+        if not existing:
+#            existing[0].populate(**track.to_dict())
+#            existing[0].put()
+#        else:
             track.put()
     return jsonify({'success': True}), 201
