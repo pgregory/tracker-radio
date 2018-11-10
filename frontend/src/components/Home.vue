@@ -24,7 +24,7 @@ export default {
       return Math.floor(Math.random() * (max - min + 1)) + min
     },
     getRandomFromBackend () {
-      const path = `http://localhost:8080/api/random`
+      const path = `http://localhost:5000/api/random`
       axios.get(path)
         .then(response => {
           this.randomNumber = response.data.randomNumber

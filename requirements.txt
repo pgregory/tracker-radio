@@ -1,4 +1,5 @@
 Flask-Cors
+Flask-sqlalchemy
 marshmallow
 requests
 requests-toolbelt

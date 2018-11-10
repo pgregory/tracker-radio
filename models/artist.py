@@ -1,26 +1,22 @@
-from google.appengine.ext import ndb
+import datetime
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
 
-class Artist(ndb.Model):
-    created_at = ndb.DateTimeProperty(auto_now_add=True)
-    updated_at = ndb.DateTimeProperty(auto_now=True)
-    name = ndb.StringProperty(indexed=True)
+from appengine.main import db
 
-    @property
-    def tracks(self):
-        from .track import Track
-        return Track.query().filter(Track.artist == self.key)
-
-    def add_track(self, track):
-        track.artist = self.key
-        track.put()
-
-    def add_coop(self, track):
-        track.coop.append(self.key)
-        track.put()
+class Artist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
+    updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
+    name = db.Column(db.String(120), nullable=False, unique=True)
+    tracks = db.relationship(
+            'Track',
+            backref=db.backref('artist', lazy='select'),
+            )
 
 class ArtistSchema(Schema):
-    id = fields.Function(lambda artist: artist.key.id())
+    id = fields.Int(dump_only=True)
     name = fields.String()
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
