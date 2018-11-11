@@ -1,5 +1,5 @@
 'use strict'
 module.exports = {
   NODE_ENV: '"production"',
-  API_BASE_URL: '"https://trackerradio.appspot.com/"'
+  API_BASE_URL: '"https://indigobeetle.pythonanywhere.com/"',
 }
