@@ -11,7 +11,7 @@ class Track(db.Model):
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
     updated_at = db.Column(db.DateTime(timezone=True), onupdate=func.now())
     title = db.Column(db.String(128), nullable=True, unique=False)
-    location = db.Column(db.String(512), nullable=False, unique=True)
+    location = db.Column(db.String(128), nullable=False, unique=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
     #coop = ndb.KeyProperty(kind="Artist", repeated=True)
 
