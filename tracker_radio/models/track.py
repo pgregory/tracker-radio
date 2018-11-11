@@ -4,7 +4,7 @@ from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
 from .artist import Artist, ArtistSchema
 
-from appengine.main import db
+from tracker_radio.main import db
 
 class Track(db.Model):
     id = db.Column(db.Integer, primary_key=True)
