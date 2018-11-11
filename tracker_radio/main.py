@@ -91,11 +91,9 @@ def post_artists():
     schema = ArtistSchema(many=True)
     result = schema.load(request.json)
     for artist in result.data:
-        existing = Artist.query.filter_by(name = artist.name).first()
-        if existing:
-            existing.populate(**artist.to_dict())
-            db.session.commit()
-        else:
+        existing = Artist.query.filter_by(name = artist.name)
+        # TODO: Need to work out a strategy for updating.
+        if existing.count() == 0:
             db.session.add(artist)
             db.session.commit()
     return jsonify({'success': True}), 201
@@ -137,11 +135,9 @@ def post_tracks():
     result = schema.load(request.json)
     if not result.errors:
         for track in result.data:
-            existing = Track.query.filter_by(location = track.location).first()
-            if existing:
-                existing.populate(**track.to_dict())
-                db.session.commit()
-            else:
+            existing = Track.query.filter_by(location = track.location)
+            # TODO: Need to work out a strategy for updating.
+            if existing.count() == 0:
                 db.session.add(track)
                 db.session.commit()
         return jsonify({'success': True}), 201
