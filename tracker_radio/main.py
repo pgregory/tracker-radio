@@ -79,7 +79,9 @@ def get_artists():
     from models.artist import Artist, ArtistSchema
     letter = request.args.get('letter', 'A')
     schema = ArtistSchema(many=True)
-    if letter == '0-9':
+    if letter == 'All':
+        artists = Artist.query.order_by(Artist.name).all()
+    elif letter == '0-9':
         #artists = Artist.query.filter(func.substr(Artist.name, 1, 1) == 'A').order_by(Artist.name).all()
         artists = Artist.query.filter(sqlalchemy.not_(
             func.substr(Artist.name, 1, 1).in_([

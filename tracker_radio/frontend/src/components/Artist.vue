@@ -1,6 +1,6 @@
 <template>
   <div class="artist-container" v-on:click="click">
-    <div class="artist">
+    <div class="artist" v-bind:class="{ empty: empty }">
       <span v-if="artist">
         {{ artist.name }}
       </span>
@@ -11,7 +11,8 @@
 <script>
 export default {
   props: {
-    artist: Object
+    artist: Object,
+    empty: Boolean
   },
   methods: {
     click: function () {
@@ -32,5 +33,8 @@ export default {
   -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
   -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
   box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+}
+.artist.empty {
+  background-color: lightslategrey;
 }
 </style>

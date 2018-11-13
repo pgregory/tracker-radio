@@ -5,19 +5,23 @@
     <b-container id="artists">
       <p>Artists</p>
       <b-row class="letters">
-        <b-col class="letter" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
+        <b-col class="letter" v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
           <span>{{ letter }}</span>
         </b-col>
       </b-row>
+      <b-row class="search">
+        <b-form-input v-model="search_string" type="text" placeholder="Search"></b-form-input>
+        <b-button :variant="primary" v-on:click="search_string = ''">X</b-button>
+      </b-row>
       <b-row class="artists">
-        <b-col class="artist" v-for="artist in artists" v-bind:key="artist.id">
+        <b-col class="artist" v-for="artist in filteredArtists()" v-bind:key="artist.id">
           <div class="dummy"></div>
           <artist v-bind:artist="artist" v-on:artist-selected="updateArtistTracks(artist.id)"/>
         </b-col>
-        <template v-if="artists.length < 5">
-        <b-col class="artist" v-for="n in (5 - artists.length)" v-bind:key="n">
+        <template v-if="filteredArtists().length < 5">
+        <b-col class="artist empty" v-for="n in (5 - filteredArtists().length)" v-bind:key="n">
           <div class="dummy"></div>
-          <artist/>
+          <artist empty/>
         </b-col>
         </template>
       </b-row>
@@ -53,16 +57,23 @@ export default {
       tracks: [],
       artist_id: '',
       track_fields: [ 'title', 'artist', 'coop', 'location' ],
-      letters: ['0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
-      letter: 'A'
+      letters: ['All', '0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
+      current_letter: 'A',
+      search_string: ''
     }
   },
   methods: {
+    filteredArtists () {
+      var searchString = this.search_string.toLowerCase()
+      return this.artists.filter(function (artist) {
+        return artist.name.toLowerCase().indexOf(searchString) !== -1
+      })
+    },
     getArtistsFromBackend () {
       const path = process.env.API_BASE_URL + `api/artists`
       axios.get(path, {
         params: {
-          letter: this.letter
+          letter: this.current_letter
         }
       })
         .then(response => {
@@ -103,7 +114,7 @@ export default {
       return playerRoot + url
     },
     selectLetter (letter) {
-      this.letter = letter
+      this.current_letter = letter
       this.getArtists()
     }
   },
@@ -179,6 +190,9 @@ export default {
   box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
   padding-right: 0;
   padding-left: 0;
+}
+.letter.active {
+  background-color: darkseagreen;
 }
 .letter span {
   white-space: nowrap;
