@@ -4,6 +4,8 @@ from flask_cors import CORS
 #import google.oauth2.id_token
 #import requests_toolbelt.adapters.appengine
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import func
+import sqlalchemy
 
 from random import *
 
@@ -78,9 +80,16 @@ def get_artists():
     letter = request.args.get('letter', 'A')
     schema = ArtistSchema(many=True)
     if letter == '0-9':
-        artists = Artist.query.filter(Artist.name.startswith('A')).order_by(Artist.name).all()
+        #artists = Artist.query.filter(func.substr(Artist.name, 1, 1) == 'A').order_by(Artist.name).all()
+        artists = Artist.query.filter(sqlalchemy.not_(
+            func.substr(Artist.name, 1, 1).in_([
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+                'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 
+                'W', 'X', 'Y', 'Z'
+            ]))).order_by(Artist.name).all()
+        print(artists)
     else:
-        artists = Artist.query.filter(Artist.name.startswith(letter)).order_by(Artist.name).all()
+        artists = Artist.query.filter(Artist.name.like('{}%'.format(letter))).order_by(Artist.name).all()
     return schema.dumps(artists)
 
 @app.route('/api/artists', methods=['POST'])
