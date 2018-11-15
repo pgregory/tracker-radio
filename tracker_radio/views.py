@@ -1,30 +1,55 @@
-from flask import Flask, render_template, request, jsonify, abort
-from flask_cors import CORS
-#import google.auth.transport.requests
-#import google.oauth2.id_token
-#import requests_toolbelt.adapters.appengine
-from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.sql import func
-import sqlalchemy
-
+from tracker_radio import app, db, auth, login_manager
+from flask import render_template, request, jsonify, abort
+from flask_login import LoginManager, UserMixin, login_user, logout_user
 from random import *
 
+class Account(UserMixin, db.Model):
 
-# Use the App Engine Requests adapter. This makes sure that Requests uses
-# URLFetch.
-#requests_toolbelt.adapters.appengine.monkeypatch()
-#HTTP_REQUEST = google.auth.transport.requests.Request()
+    __tablename__ = 'accounts'
 
-app = Flask(__name__, static_folder = "./static")
-cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+    account_id = db.Column(db.Integer, primary_key=True)
+    firebase_user_id = db.Column(db.Text, unique=True)
+    email = db.Column(db.Text, unique=True, nullable=False)
+    email_verified = db.Column(db.Boolean, default=False, nullable=False)
+    name = db.Column(db.Text)
+    photo_url = db.Column(db.Text)
 
-if app.debug:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////tmp/test.db'
-else:
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql://indigobeetle:tr4ck3r-r4d10@indigobeetle.mysql.pythonanywhere-services.com/indigobeetle$trackerradio'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_POOL_RECYCLE'] = 280
-db = SQLAlchemy(app)
+    def get_id(self):
+        return self.account_id
+
+
+@auth.production_loader
+def production_sign_in(token):
+    account = Account.query.filter_by(firebase_user_id=token['sub']).one_or_none()
+    if account is None:
+        account = Account(firebase_user_id=token['sub'])
+        db.session.add(account)
+    account.email = token['email']
+    account.email_verified = token['email_verified']
+    account.name = token.get('name')
+    account.photo_url = token.get('picture')
+    db.session.flush()
+    login_user(account)
+    db.session.commit()
+
+@auth.development_loader
+def development_sign_in(email):
+    login_user(Account.query.filter_by(email=email).one())
+
+
+@auth.unloader
+def sign_out():
+    logout_user()
+
+
+@login_manager.user_loader
+def load_user(account_id):
+    return Account.query.get(account_id)
+
+
+@login_manager.unauthorized_handler
+def authentication_required():
+    return auth.url_for('widget', mode='select', next=request.url)
 
 @app.route('/')
 def index():
@@ -36,8 +61,8 @@ def form():
 
 @app.route('/submitted', methods=['POST'])
 def submitted_form():
-    from models.track import Track, TrackSchema
-    from models.artist import Artist, ArtistSchema
+    from tracker_radio.models.track import Track, TrackSchema
+    from tracker_radio.models.artist import Artist, ArtistSchema
     name = request.form['name']
 
     artist = Artist(name=name)
@@ -75,8 +100,8 @@ def catch_all(path):
 
 @app.route('/api/artists', methods=['GET'])
 def get_artists():
-    from models.track import Track, TrackSchema
-    from models.artist import Artist, ArtistSchema
+    from tracker_radio.models.track import Track, TrackSchema
+    from tracker_radio.models.artist import Artist, ArtistSchema
     letter = request.args.get('letter', 'A')
     schema = ArtistSchema(many=True)
     if letter == 'All':
@@ -96,8 +121,8 @@ def get_artists():
 
 @app.route('/api/artists', methods=['POST'])
 def post_artists():
-    from models.track import Track, TrackSchema
-    from models.artist import Artist, ArtistSchema
+    from tracker_radio.models.track import Track, TrackSchema
+    from tracker_radio.models.artist import Artist, ArtistSchema
     if not request.json:
         abort(400)
     schema = ArtistSchema(many=True)
@@ -112,8 +137,8 @@ def post_artists():
 
 @app.route('/api/artists/<int:artist_id>', methods=['GET'])
 def get_artist(artist_id):
-    from models.track import Track, TrackSchema
-    from models.artist import Artist, ArtistSchema
+    from tracker_radio.models.track import Track, TrackSchema
+    from tracker_radio.models.artist import Artist, ArtistSchema
     schema = ArtistSchema()
     artist = Artist.get_by_id(artist_id)
     if not artist:
@@ -122,8 +147,8 @@ def get_artist(artist_id):
 
 @app.route('/api/artists/<int:artist_id>/tracks', methods=['GET'])
 def get_artist_tracks(artist_id):
-    from models.track import Track, TrackSchema
-    from models.artist import Artist, ArtistSchema
+    from tracker_radio.models.track import Track, TrackSchema
+    from tracker_radio.models.artist import Artist, ArtistSchema
     schema = TrackSchema(many=True)
     artist = Artist.query.filter_by(id=artist_id).first()
     if not artist:
@@ -133,14 +158,14 @@ def get_artist_tracks(artist_id):
 
 @app.route('/api/tracks', methods=['GET'])
 def get_tracks():
-    from models.track import Track, TrackSchema
+    from tracker_radio.models.track import Track, TrackSchema
     schema = TrackSchema(many=True)
     tracks = Track.query().order(Track.title).fetch(5)
     return schema.dumps(tracks)
 
 @app.route('/api/tracks', methods=['POST'])
 def post_tracks():
-    from models.track import Track, TrackSchema
+    from tracker_radio.models.track import Track, TrackSchema
     if not request.json:
         abort(400)
     schema = TrackSchema(many=True)
@@ -155,3 +180,4 @@ def post_tracks():
         return jsonify({'success': True}), 201
     else:
         return jsonify(result.errors), 400
+

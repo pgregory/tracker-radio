@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
 
-from tracker_radio.main import db
+from tracker_radio import db
 
 class Artist(db.Model):
     id = db.Column(db.Integer, primary_key=True)

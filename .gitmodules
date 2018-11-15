@@ -1,0 +1,3 @@
+[submodule "flask-firebase"]
+	path = flask_firebase
+	url = https://github.com/klokantech/flask-firebase.git
