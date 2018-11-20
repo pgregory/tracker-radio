@@ -2,3 +2,4 @@ lib/
 **/*.pyc
 venv/
 *.egg-info
+trackerradio-firebase-adminsdk*.json

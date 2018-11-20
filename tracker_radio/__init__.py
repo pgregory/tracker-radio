@@ -25,7 +25,7 @@ login_manager = LoginManager(app)
 default_app = None
 
 if (not len(firebase_admin._apps)):
-    cred = credentials.Certificate('./trackerradio-firebase-adminsdk-1mpyw-4a60ca93be.json')
+    cred = credentials.Certificate('./trackerradio-firebase-adminsdk-1mpyw-b8ede5047b.json')
     default_app = firebase_admin.initialize_app(cred)
 
 import tracker_radio.views
