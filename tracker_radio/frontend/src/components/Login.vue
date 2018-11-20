@@ -1,22 +1,26 @@
 <template>
-  <div class="login">
-    <h1>Sign In</h1>
-    <b-form-input type="text" placeholder="email"></b-form-input><br/>
-    <b-form-input type="password" placeholder="Password"></b-form-input><br/>
-    <b-button v-on:click="login">Login</b-button>
-    <p>Don't have an account? You can <router-link to="/sign-up">create one</router-link></p>
-  </div>
+  <div id="firebaseui-auth-container"></div>
 </template>
 
 <script>
+import firebase from 'firebase'
+import firebaseui from 'firebaseui'
+// import {config} from '../helpers/firebaseConfig'
 export default {
+  name: 'login',
+  mounted: function () {
+    var uiConfig = {
+      signInSuccessUrl: '/artists',
+      signInOptions: [
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
+        firebase.auth.EmailAuthProvider.PROVIDER_ID
+      ]
+    }
+    var ui = new firebaseui.auth.AuthUI(firebase.auth())
+    ui.start('#firebaseui-auth-container', uiConfig)
+  },
   data: function () {
     return {
-    }
-  },
-  methods: {
-    login: function () {
-      this.$router.replace('/')
     }
   }
 }

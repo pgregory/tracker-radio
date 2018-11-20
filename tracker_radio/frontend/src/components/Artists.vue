@@ -11,7 +11,7 @@
       </b-row>
       <b-row class="search">
         <b-form-input v-model="search_string" type="text" placeholder="Search"></b-form-input>
-        <b-button :variant="primary" v-on:click="search_string = ''">X</b-button>
+        <b-button v-on:click="search_string = ''">X</b-button>
       </b-row>
       <b-row class="artists">
         <b-col class="artist" v-for="artist in filteredArtists()" v-bind:key="artist.id">

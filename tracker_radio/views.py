@@ -1,7 +1,10 @@
-from tracker_radio import app, db, auth, login_manager
+from functools import wraps
+
+from tracker_radio import app, db, login_manager, default_app
 from flask import render_template, request, jsonify, abort
 from flask_login import LoginManager, UserMixin, login_user, logout_user
 from random import *
+from firebase_admin import _utils, _token_gen
 
 class Account(UserMixin, db.Model):
 
@@ -17,31 +20,6 @@ class Account(UserMixin, db.Model):
     def get_id(self):
         return self.account_id
 
-
-@auth.production_loader
-def production_sign_in(token):
-    account = Account.query.filter_by(firebase_user_id=token['sub']).one_or_none()
-    if account is None:
-        account = Account(firebase_user_id=token['sub'])
-        db.session.add(account)
-    account.email = token['email']
-    account.email_verified = token['email_verified']
-    account.name = token.get('name')
-    account.photo_url = token.get('picture')
-    db.session.flush()
-    login_user(account)
-    db.session.commit()
-
-@auth.development_loader
-def development_sign_in(email):
-    login_user(Account.query.filter_by(email=email).one())
-
-
-@auth.unloader
-def sign_out():
-    logout_user()
-
-
 @login_manager.user_loader
 def load_user(account_id):
     return Account.query.get(account_id)
@@ -55,39 +33,12 @@ def authentication_required():
 def index():
     return render_template('index.html')
 
-@app.route('/form')
-def form():
-    return render_template('form.html')
-
-@app.route('/submitted', methods=['POST'])
-def submitted_form():
-    from tracker_radio.models.track import Track, TrackSchema
-    from tracker_radio.models.artist import Artist, ArtistSchema
-    name = request.form['name']
-
-    artist = Artist(name=name)
-    artist.put()
-    return render_template(
-            'submitted_form.html',
-            name=name)
-
 @app.route('/api/random')
 def random_number():
     response = {
             'randomNumber': randint(1, 100)
             }
     return jsonify(response)
-
-#@app.route('/api/user')
-#def get_current_user():
-#    id_token = request.headers['Authorization'].split(' ').pop()
-#    claims = google.oauth2.id_token.verify_firebase_token(
-#        id_token, HTTP_REQUEST) 
-#    print(claims)
-#    response = {
-#            'user': users.get_current_user()
-#            }
-#    return jsonify(response)
 
 import requests
 
@@ -181,3 +132,42 @@ def post_tracks():
     else:
         return jsonify(result.errors), 400
 
+def token_required(f):  
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        auth_headers = request.headers.get('Authorization', '').split()
+
+        invalid_msg = {
+            'message': 'Invalid token. Registeration and / or authentication required',
+            'authenticated': False
+        }
+        expired_msg = {
+            'message': 'Expired token. Reauthentication required.',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 2:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[1]
+            token_verifier = _token_gen.TokenVerifier(default_app)
+            verified_claims = token_verifier.verify_id_token(token)
+            user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        #except jwt.ExpiredSignatureError:
+        #    return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+        except ValueError as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
+
+@app.route('/api/signin', methods=['POST'])
+@token_required
+def signin(user):
+    print(user)
+    return jsonify({'success': True}), 201
+    

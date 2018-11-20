@@ -9,6 +9,12 @@
             <b-navbar-nav>
               <b-nav-item href="/artists">Artists</b-nav-item>
             </b-navbar-nav>
+            <b-navbar-nav class="ml-auto">
+              <b-nav-form>
+                <b-nav-item v-on:click="logout" v-if="user != null">{{ user ? user.displayName : "Not Logged In" }}</b-nav-item>
+                <b-nav-item v-if="user == null" href="/login">Login</b-nav-item>
+              </b-nav-form>
+            </b-navbar-nav>
           </b-collapse>
         </b-navbar>
       </b-container>
@@ -22,9 +28,45 @@
 <script>
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+import firebase from 'firebase'
+import axios from 'axios'
 
 export default {
-  name: 'App'
+  name: 'App',
+  data () {
+    return {
+      user: null
+    }
+  },
+  mounted: function () {
+    var self = this
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        self.user = user
+        user.getIdToken(true).then(function (idToken) {
+          const path = process.env.API_BASE_URL + `api/signin`
+          axios.post(path, {
+            token: idToken
+          }, { headers: { 'Authorization': 'bearer ' + idToken } }).then(function (response) {
+            console.log(response)
+          })
+        })
+      } else {
+        self.user = null
+      }
+    })
+  },
+  methods: {
+    logout () {
+      var self = this
+      firebase.auth().signOut().then(function () {
+        // Sign-out successful.
+        self.user = null
+      }, function (error) {
+        console.log(error)
+      })
+    }
+  }
 }
 </script>
 

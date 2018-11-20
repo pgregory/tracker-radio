@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
 import BootstrapVue from 'bootstrap-vue'
+import '../node_modules/firebaseui/dist/firebaseui.css'
 import App from './App'
 import router from './router'
 import firebase from 'firebase/app'

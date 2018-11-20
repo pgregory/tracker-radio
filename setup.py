@@ -11,7 +11,6 @@ setup(
             'Flask-Login',
             'marshmallow',
             'requests',
-            'pyjwt',
-            'cryptography'
+            'firebase-admin'
             ]
         )
