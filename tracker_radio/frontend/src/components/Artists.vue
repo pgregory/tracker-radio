@@ -38,7 +38,7 @@
             {{ data.item.artist[0].name }}
           </template>
           <template slot="rank" slot-scope="data">
-            <star-rating v-bind:star-size="20" v-bind:read-only="user == null"
+            <star-rating v-model="data.item.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
               v-on:rating-selected="setRating($event, data.item.id)"></star-rating>
           </template>
           <template slot="location" slot-scope="data">

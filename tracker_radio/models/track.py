@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
 from .artist import Artist, ArtistSchema
+from .rating import Rating
 
 from tracker_radio import db
 
@@ -23,6 +24,14 @@ class TrackSchema(Schema):
     #coop = fields.Method("get_coops")
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
+    average_rating = fields.Method("get_average_rating")
+
+    def get_average_rating(self, obj):
+        rating_scores = [r.rating for r in obj.ratings]
+        if len(rating_scores) > 0:
+            return float(sum(rating_scores)) / len(rating_scores)
+        else:
+            return 0.0
 
     @post_load
     def make_track(self, data):

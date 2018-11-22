@@ -173,8 +173,11 @@ def post_tracks():
 def rate_track(user, track_id):
     from tracker_radio.models.rating import Rating
     data = request.json
-    print(track_id, data['rating'])
-    rating = Rating(track_id=track_id, user_id=user.account_id, rating=data['rating'])
+    rating = Rating.query.filter_by(track_id=track_id, user_id=user.account_id).first()
+    if rating:
+        rating.rating = data['rating']
+    else:
+        rating = Rating(track_id=track_id, user_id=user.account_id, rating=data['rating'])
     db.session.add(rating)
     db.session.commit()
     return jsonify({'success': True}), 201
