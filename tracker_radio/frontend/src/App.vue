@@ -20,7 +20,7 @@
       </b-container>
     </div>
     <div id="page">
-      <router-view/>
+      <router-view :user="user"></router-view>
     </div>
   </div>
 </template>

@@ -37,6 +37,10 @@
           <template slot="artist" slot-scope="data">
             {{ data.item.artist[0].name }}
           </template>
+          <template slot="rank" slot-scope="data">
+            <star-rating v-bind:star-size="20" v-bind:read-only="user == null"
+              v-on:rating-selected="setRating($event, data.item.id)"></star-rating>
+          </template>
           <template slot="location" slot-scope="data">
             <a :href="getTrackLocation(data.item)" target="_blank">Play</a>
           </template>
@@ -49,14 +53,20 @@
 <script>
 import axios from 'axios'
 import Artist from './Artist.vue'
+import StarRating from 'vue-star-rating'
+import firebase from 'firebase'
 
 export default {
+  name: 'Artists',
+  props: {
+    user: Object
+  },
   data () {
     return {
       artists: [],
       tracks: [],
       artist_id: '',
-      track_fields: [ 'title', 'artist', 'coop', 'location' ],
+      track_fields: [ 'title', 'artist', 'coop', 'location', 'rank' ],
       letters: ['All', '0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
       current_letter: 'A',
       search_string: ''
@@ -116,10 +126,28 @@ export default {
     selectLetter (letter) {
       this.current_letter = letter
       this.getArtists()
+    },
+    setRating (rating, track) {
+      console.log(track, rating)
+      const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
+      const user = firebase.auth().currentUser
+      if (user) {
+        user.getIdToken(true).then(function (idToken) {
+          axios.post(path, {
+            rating: rating
+          }, { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              console.log(response)
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
     }
   },
   components: {
-    Artist
+    Artist,
+    StarRating
   },
   created () {
     this.getArtists()

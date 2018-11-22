@@ -3,6 +3,8 @@ from functools import wraps
 from tracker_radio import app, db, login_manager, default_app
 from flask import render_template, request, jsonify, abort
 from flask_login import LoginManager, UserMixin, login_user, logout_user
+import sqlalchemy
+from sqlalchemy import func
 from random import *
 from firebase_admin import _utils, _token_gen
 
@@ -28,6 +30,40 @@ def load_user(account_id):
 @login_manager.unauthorized_handler
 def authentication_required():
     return auth.url_for('widget', mode='select', next=request.url)
+
+def token_required(f):  
+    @wraps(f)
+    def _verify(*args, **kwargs):
+        auth_headers = request.headers.get('Authorization', '').split()
+
+        invalid_msg = {
+            'message': 'Invalid token. Registeration and / or authentication required',
+            'authenticated': False
+        }
+        expired_msg = {
+            'message': 'Expired token. Reauthentication required.',
+            'authenticated': False
+        }
+
+        if len(auth_headers) != 2:
+            return jsonify(invalid_msg), 401
+
+        try:
+            token = auth_headers[1]
+            token_verifier = _token_gen.TokenVerifier(default_app)
+            verified_claims = token_verifier.verify_id_token(token)
+            user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
+            if not user:
+                raise RuntimeError('User not found')
+            return f(user, *args, **kwargs)
+        #except jwt.ExpiredSignatureError:
+        #    return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
+        except ValueError as e:
+            print(e)
+            return jsonify(invalid_msg), 401
+
+    return _verify
+
 
 @app.route('/')
 def index():
@@ -132,38 +168,16 @@ def post_tracks():
     else:
         return jsonify(result.errors), 400
 
-def token_required(f):  
-    @wraps(f)
-    def _verify(*args, **kwargs):
-        auth_headers = request.headers.get('Authorization', '').split()
-
-        invalid_msg = {
-            'message': 'Invalid token. Registeration and / or authentication required',
-            'authenticated': False
-        }
-        expired_msg = {
-            'message': 'Expired token. Reauthentication required.',
-            'authenticated': False
-        }
-
-        if len(auth_headers) != 2:
-            return jsonify(invalid_msg), 401
-
-        try:
-            token = auth_headers[1]
-            token_verifier = _token_gen.TokenVerifier(default_app)
-            verified_claims = token_verifier.verify_id_token(token)
-            user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
-            if not user:
-                raise RuntimeError('User not found')
-            return f(user, *args, **kwargs)
-        #except jwt.ExpiredSignatureError:
-        #    return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-        except ValueError as e:
-            print(e)
-            return jsonify(invalid_msg), 401
-
-    return _verify
+@app.route('/api/tracks/<int:track_id>/rate', methods=['POST'])
+@token_required
+def rate_track(user, track_id):
+    from tracker_radio.models.rating import Rating
+    data = request.json
+    print(track_id, data['rating'])
+    rating = Rating(track_id=track_id, user_id=user.account_id, rating=data['rating'])
+    db.session.add(rating)
+    db.session.commit()
+    return jsonify({'success': True}), 201
 
 @app.route('/api/signin', methods=['POST'])
 @token_required
