@@ -183,8 +183,42 @@ def rate_track(user, track_id):
     return jsonify({'success': True}), 201
 
 @app.route('/api/signin', methods=['POST'])
-@token_required
-def signin(user):
-    print(user)
-    return jsonify({'success': True}), 201
+def signin():
+    auth_headers = request.headers.get('Authorization', '').split()
+
+    invalid_msg = {
+        'message': 'Invalid token. Registeration and / or authentication required',
+        'authenticated': False
+    }
+    created_msg = {
+        'message': 'User account created.',
+        'authenticated': True
+    }
+    signed_in_msg = {
+        'message': 'User signed in.',
+        'authenticated': True
+    }
+
+    if len(auth_headers) != 2:
+        return jsonify(invalid_msg), 401
+
+    try:
+        token = auth_headers[1]
+        token_verifier = _token_gen.TokenVerifier(default_app)
+        verified_claims = token_verifier.verify_id_token(token)
+        user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
+        if not user:
+            user = Account(firebase_user_id=verified_claims['uid'], 
+                    email = verified_claims['email'],
+                    email_verified = verified_claims['email_verified'],
+                    name = verified_claims['name'],
+                    photo_url = verified_claims['picture']
+                    )
+            db.session.add(user)
+            db.session.commit()
+            return jsonify(created_msg), 201
+    except ValueError as e:
+        return jsonify(invalid_msg), 401
+
+    return jsonify(signed_in_msg), 200
     
