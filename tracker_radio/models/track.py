@@ -7,6 +7,10 @@ from .rating import Rating
 
 from tracker_radio import db
 
+collaborators = db.Table('collaborators', 
+        db.Column('track_id', db.Integer, db.ForeignKey('track.id'), primary_key=True),
+        db.Column('artist_id', db.Integer, db.ForeignKey('artist.id'), primary_key=True))
+
 class Track(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     created_at = db.Column(db.DateTime(timezone=True), server_default=func.now())
@@ -14,14 +18,15 @@ class Track(db.Model):
     title = db.Column(db.String(128), nullable=True, unique=False)
     location = db.Column(db.String(128), nullable=False, unique=True)
     artist_id = db.Column(db.Integer, db.ForeignKey('artist.id'))
-    #coop = ndb.KeyProperty(kind="Artist", repeated=True)
+    collaborators = db.relationship('Artist', secondary=collaborators, lazy='subquery',
+            backref=db.backref('collaborations', lazy=True))
 
 class TrackSchema(Schema):
     id = fields.Int(dump_only=True)
     title = fields.String()
     location = fields.String()
     artist = fields.String()
-    #coop = fields.Method("get_coops")
+    coop = fields.List(fields.String())
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
     average_rating = fields.Method("get_average_rating")
@@ -40,13 +45,16 @@ class TrackSchema(Schema):
             if artist:
                 data['artist_id'] = artist.id
                 del data['artist']
+
+        if 'coop' in data:
+            coops = []
+            for coop_name in data['coop']:
+                coop = Artist.query.filter_by(name = coop_name).first()
+                if coop:
+                    coops.append(coop)
+            data['collaborators'] = coops
+            del data['coop']
+
+        print(data)
         track = Track(**data)
         return track
-
-#        if 'coop' in data:
-#            coops = []
-#            for coop_name in data['coop']:
-#                coop = Artist.query(Artist.name == coop_name).get()
-#                if coop:
-#                    coops.append(coop.key)
-#            data['coop'] = coops

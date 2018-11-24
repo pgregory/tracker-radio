@@ -166,6 +166,7 @@ def post_tracks():
                 db.session.commit()
         return jsonify({'success': True}), 201
     else:
+        print(result.errors)
         return jsonify(result.errors), 400
 
 @app.route('/api/tracks/<int:track_id>/rate', methods=['POST'])
