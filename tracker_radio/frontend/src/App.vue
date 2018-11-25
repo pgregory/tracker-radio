@@ -76,6 +76,7 @@ html {
 }
 body {
   height: 100%;
+  background-color: black;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;

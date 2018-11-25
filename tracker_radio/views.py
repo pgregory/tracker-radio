@@ -147,8 +147,18 @@ def get_artist_tracks(artist_id):
 def get_tracks():
     from tracker_radio.models.track import Track, TrackSchema
     schema = TrackSchema(many=True)
-    tracks = Track.query().order(Track.title).fetch(5)
+    tracks = Track.query.order_by(Track.title).fetch(5)
     return schema.dumps(tracks)
+
+@app.route('/api/tracks/<int:track_id>', methods=['GET'])
+def get_track(track_id):
+    from tracker_radio.models.track import Track, TrackSchema
+    schema = TrackSchema()
+    track = Track.query.filter_by(id=track_id).first()
+    if track:
+        return schema.dumps(track)
+    else:
+        return jsonify({'success': False, 'msg': 'Not found'}), 404
 
 @app.route('/api/tracks', methods=['POST'])
 def post_tracks():

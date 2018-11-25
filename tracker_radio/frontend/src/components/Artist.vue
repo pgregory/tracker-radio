@@ -1,11 +1,18 @@
 <template>
-  <div class="artist-container" v-on:click="click">
-    <div class="artist" v-bind:class="{ empty: empty }">
-      <span v-if="artist">
-        {{ artist.name }}
-      </span>
-    </div>
-  </div>
+  <b-container class="artist-container" v-on:click="click">
+    <b-container class="artist" v-bind:class="{ empty: empty }">
+      <b-row class="artist-name">
+        <span v-if="artist">
+          {{ artist.name }}
+        </span>
+      </b-row>
+      <b-row class="artist-image">
+        <div class="artist-image-container">
+          <b-img v-if="artist" v-bind:src="getRandomAvatar()"></b-img>
+        </div>
+      </b-row>
+    </b-container>
+  </b-container>
 </template>
 
 <script>
@@ -15,9 +22,13 @@ export default {
     empty: Boolean
   },
   methods: {
-    click: function () {
-      console.log('Clicked!')
+    click () {
       this.$emit('artist-selected')
+    },
+    getRandomAvatar () {
+      var index = Math.ceil(Math.random() * 4)
+      var strIndex = ('000' + index).slice(-3)
+      return `static/avatar-${strIndex}.png`
     }
   }
 }
@@ -25,16 +36,33 @@ export default {
 
 <style scoped>
 .artist {
-  border: 1px solid black;
+  border: 2px solid rgb(0,255,0);
   width: 200px;
   height: 100%;
   flex-basis: auto;
   border-radius: 5px;
-  -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  -webkit-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
+  -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
+  box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
+  background-color: #212529;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 .artist.empty {
   background-color: lightslategrey;
+}
+.artist-name {
+  color: white;
+  flex-shrink: 0;
+}
+.artist-image-container {
+  margin: 5px;
+}
+.artist-image-container img {
+  height: 100%;
+}
+.artist-image {
+  flex: auto;
 }
 </style>
