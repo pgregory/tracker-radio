@@ -26,7 +26,7 @@ export default {
       this.$emit('artist-selected')
     },
     getRandomAvatar () {
-      var index = Math.ceil(Math.random() * 4)
+      var index = Math.ceil(Math.random() * 6)
       var strIndex = ('000' + index).slice(-3)
       return `static/avatar-${strIndex}.png`
     }
