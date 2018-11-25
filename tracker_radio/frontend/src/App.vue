@@ -74,7 +74,7 @@ export default {
 html {
   height: 100%;
 }
-body {
+html body {
   height: 100%;
   background-color: black;
 }
