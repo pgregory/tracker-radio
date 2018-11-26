@@ -56,13 +56,18 @@ export default {
   color: white;
   flex-shrink: 0;
 }
-.artist-image-container {
-  margin: 5px;
-}
-.artist-image-container img {
-  height: 100%;
-}
 .artist-image {
   flex: auto;
+  display: flex;
+  min-height: 0;
+  width: 100%;
+}
+.artist-image-container {
+  padding: 5px;
+  flex: auto;
+  width: 100%;
+}
+.artist-image-container img {
+  height: 132px;
 }
 </style>
