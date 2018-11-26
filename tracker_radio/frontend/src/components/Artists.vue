@@ -101,6 +101,7 @@ export default {
   display: flex;
   flex-direction: column;
   flex: auto;
+  min-height: 0;
 }
 .dummy {
   margin-top: 100%;
@@ -133,6 +134,7 @@ export default {
   flex: auto;
   display: flex;
   flex-direction: row;
+  min-height: 0;
 }
 #tracks, #track {
   flex: auto;
