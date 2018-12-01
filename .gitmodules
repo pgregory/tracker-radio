@@ -1,0 +1,3 @@
+[submodule "tracker_radio/frontend/src/wetracker"]
+	path = tracker_radio/frontend/src/wetracker
+	url = https://github.com/pgregory/wetracker.git
