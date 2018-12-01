@@ -11,11 +11,8 @@
           <p class="track-title">{{track.title}}</p>
         </b-row>
         <b-row>
-          <a class="track-play" v-bind:href="getTrackLocation(track)" target="_blank">&gt;</a>
-        </b-row>
-        <b-row>
           <star-rating v-model="track.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
-            v-on:rating-selected="setRating($event, data.item.id)"></star-rating>
+            v-on:rating-selected="setRating($event, track.id)"></star-rating>
         </b-row>
       </b-container>
     </b-container>
@@ -49,7 +46,6 @@ export default {
         axios.get(path)
           .then(response => {
             this.track = response.data
-            console.log(this.track)
           })
           .catch(error => {
             console.log(error)
@@ -57,9 +53,8 @@ export default {
       }
     },
     getTrackLocation (track) {
-      const playerRoot = 'http://app.wetracker.xyz/#/loadsong?play=1&url='
-      var url = encodeURI('https://modland.ziphoid.com/pub/modules/Fasttracker 2/' + track.location)
-      return playerRoot + url
+      var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
+      return url
     },
     setRating (rating, track) {
       const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
@@ -84,7 +79,6 @@ export default {
   created () {
     this.getTrackData()
   }
-
 }
 </script>
 

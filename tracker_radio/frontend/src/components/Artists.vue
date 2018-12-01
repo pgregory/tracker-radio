@@ -29,6 +29,7 @@
     <b-container id="track-panel">
       <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
       <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
+      <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
     </b-container>
   </div>
 </template>
@@ -38,6 +39,7 @@ import axios from 'axios'
 import Artist from './Artist.vue'
 import TrackList from './TrackList.vue'
 import TrackData from './TrackData.vue'
+import TrackPlayer from './TrackPlayer.vue'
 
 export default {
   name: 'Artists',
@@ -88,7 +90,8 @@ export default {
   components: {
     Artist,
     TrackList,
-    TrackData
+    TrackData,
+    TrackPlayer
   },
   created () {
     this.getArtists()

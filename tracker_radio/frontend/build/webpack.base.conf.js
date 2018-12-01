@@ -13,6 +13,7 @@ const createLintingRule = () => ({
   loader: 'eslint-loader',
   enforce: 'pre',
   include: [resolve('src'), resolve('test')],
+  exclude: [resolve('src/wetracker')],
   options: {
     formatter: require('eslint-friendly-formatter'),
     emitWarning: !config.dev.showEslintErrorsInOverlay
@@ -36,6 +37,7 @@ module.exports = {
     alias: {
       'vue$': 'vue/dist/vue.esm.js',
       '@': resolve('src'),
+      'wetracker': resolve('src/wetracker/src'),
     }
   },
   module: {
@@ -74,6 +76,10 @@ module.exports = {
           limit: 10000,
           name: utils.assetsPath('fonts/[name].[hash:7].[ext]')
         }
+      }, 
+      {
+        test: /\.lz4$/,
+        loader: "arraybuffer-loader"
       }
     ]
   },
