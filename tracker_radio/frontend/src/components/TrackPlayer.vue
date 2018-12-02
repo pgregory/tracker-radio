@@ -62,6 +62,7 @@ export default {
       var url = this.getTrackLocation(track)
       player.stop()
       song.downloadSong(url).then(() => {
+        console.log('Start Playing')
         player.startPlaying()
       })
     },
