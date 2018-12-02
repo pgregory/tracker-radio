@@ -6,13 +6,17 @@
       </b-col>
     </b-row>
     <b-container id="track-player">
-      <b-container class="track-player-inner" v-if="track">
+      <b-container class="track-player-inner">
         <b-row>
-          <b-button v-on:click="loadSong(track)">Play</b-button>
-          <b-button v-on:click="stopSong">Stop</b-button>
+          <div class="transport-container">
+            <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
+            <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
+          </div>
         </b-row>
-        <b-row>
-          <canvas ref="monitor" style="width:100%;height:100%;" class="monitor-canvas"></canvas>
+        <b-row id="monitors">
+          <div class="monitor-container">
+            <canvas ref="monitor" style="width:100%;height:100%;" class="monitor-canvas"></canvas>
+          </div>
         </b-row>
       </b-container>
     </b-container>
@@ -81,7 +85,7 @@ export default {
 
       ctx.fillStyle = '#0f0'
       ctx.strokeStyle = '#04AEF7'
-      ctx.lineWidth = 1
+      ctx.lineWidth = 2
 
       // volume in dB as a green bar
       // var vu_y = -Math.log(e.vu[j])*10;
@@ -111,6 +115,12 @@ export default {
   created () {
     this.getTrackData()
     connect(player, 'tracksChanged', this, 'onTracksChanged')
+  },
+  mounted () {
+    var canvas = this.$refs['monitor']
+    console.log(canvas.height)
+    canvas.width = canvas.offsetWidth
+    canvas.height = canvas.offsetHeight
   }
 }
 </script>
@@ -142,5 +152,18 @@ export default {
 .track-title {
   color: white;
   font-size: 28px;
+}
+.monitor-container, .transport-container {
+  margin: 10px;
+}
+#monitors {
+  flex: auto;
+}
+.monitor-container canvas {
+  border-radius: 5px;
+  border: 2px solid rgb(0,255,0);
+  -webkit-box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
+  -moz-box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
+  box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
 }
 </style>
