@@ -62,7 +62,7 @@ export default {
       var url = this.getTrackLocation(track)
       player.stop()
       song.downloadSong(url).then(() => {
-        console.log('Start Playing')
+        console.log(`Start Playing: ${player.timerWorker}`)
         player.startPlaying()
       })
     },
