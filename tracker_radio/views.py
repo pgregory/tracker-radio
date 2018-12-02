@@ -1,7 +1,7 @@
 from functools import wraps
 
 from tracker_radio import app, db, login_manager, default_app
-from flask import render_template, request, jsonify, abort
+from flask import render_template, request, jsonify, abort, redirect
 from flask_login import LoginManager, UserMixin, login_user, logout_user
 import sqlalchemy
 from sqlalchemy import func
@@ -67,7 +67,7 @@ def token_required(f):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return redirect('/artists')
 
 @app.route('/api/random')
 def random_number():
