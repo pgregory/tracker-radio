@@ -26,6 +26,7 @@
 <script>
 import axios from 'axios'
 
+import { state } from 'wetracker/state'
 import { song } from 'wetracker/utils/songmanager'
 import { player } from 'wetracker/audio/player'
 import { connect } from 'wetracker/utils/signal'
@@ -121,6 +122,11 @@ export default {
     console.log(canvas.height)
     canvas.width = canvas.offsetWidth
     canvas.height = canvas.offsetHeight
+    state.set({
+      transport: {
+        masterVolume: -10.0
+      }
+    })
   }
 }
 </script>
