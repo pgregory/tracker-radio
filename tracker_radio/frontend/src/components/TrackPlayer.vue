@@ -15,6 +15,7 @@
         </b-row>
         <b-row id="monitors">
           <div class="monitor-container">
+            <div class="monitor-border"></div>
             <canvas ref="monitor" style="width:100%;height:100%;" class="monitor-canvas"></canvas>
           </div>
         </b-row>
@@ -84,17 +85,29 @@ export default {
       ctx.fillStyle = '#000'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      ctx.fillStyle = '#0f0'
-      ctx.strokeStyle = '#04AEF7'
-      ctx.lineWidth = 2
-
-      // volume in dB as a green bar
-      // var vu_y = -Math.log(e.vu[j])*10;
-      // ctx.fillRect(10, vu_y, 5, canvas.height-vu_y);
-
-      const cho2 = canvas.height / 2
+      ctx.strokeStyle = '#080'
+      ctx.lineWidth = 1
+      const xBarIncrement = (canvas.width / 10.0)
+      for (var x = 0; x < canvas.width; x += xBarIncrement) {
+        ctx.beginPath()
+        ctx.moveTo(x, 0)
+        ctx.lineTo(x, canvas.height)
+        ctx.stroke()
+      }
+      const yBarIncrement = (canvas.height / 10.0)
+      for (var y = 0; y < canvas.height; y += yBarIncrement) {
+        ctx.beginPath()
+        ctx.moveTo(0, y)
+        ctx.lineTo(canvas.width, y)
+        ctx.stroke()
+      }
 
       if ('masterScope' in e && 'scopeData' in e.masterScope) {
+        ctx.fillStyle = '#0f0'
+        ctx.strokeStyle = '#04AEF7'
+        ctx.lineWidth = 2
+
+        const cho2 = canvas.height / 2
         const scopeData = e.masterScope.scopeData
         const bufferLength = e.masterScope.bufferLength
 
@@ -119,7 +132,6 @@ export default {
   },
   mounted () {
     var canvas = this.$refs['monitor']
-    console.log(canvas.height)
     canvas.width = canvas.offsetWidth
     canvas.height = canvas.offsetHeight
     state.set({
@@ -127,6 +139,7 @@ export default {
         masterVolume: -10.0
       }
     })
+    this.renderMonitors()
   }
 }
 </script>
@@ -161,15 +174,25 @@ export default {
 }
 .monitor-container, .transport-container {
   margin: 10px;
+  position: relative;
+}
+.monitor-container {
+  background-color: black;
 }
 #monitors {
   flex: auto;
 }
-.monitor-container canvas {
+.monitor-border {
+  position: absolute;
   border-radius: 5px;
   border: 2px solid rgb(0,255,0);
-  -webkit-box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
-  -moz-box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
-  box-shadow: 0px 0px 10px 3px rgba(0,128,0,1);
+  -webkit-box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
+  -moz-box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
+  box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
+  width: 100%;
+  height: 100%;
+}
+.monitor-container canvas {
+  border-radius: 5px;
 }
 </style>
