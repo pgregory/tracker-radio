@@ -68,7 +68,6 @@ export default {
       var url = this.getTrackLocation(track)
       player.stop()
       song.downloadSong(url).then(() => {
-        console.log(`Start Playing: ${player.timerWorker}`)
         player.startPlaying()
       })
     },
@@ -80,49 +79,51 @@ export default {
     },
     renderMonitors (e) {
       const canvas = this.$refs['monitor']
-      const ctx = canvas.getContext('2d', { alpha: false })
+      if (canvas) {
+        const ctx = canvas.getContext('2d', { alpha: false })
 
-      ctx.fillStyle = '#000'
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+        ctx.fillStyle = '#000'
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-      ctx.strokeStyle = '#080'
-      ctx.lineWidth = 1
-      const xBarIncrement = (canvas.width / 10.0)
-      for (var x = 0; x < canvas.width; x += xBarIncrement) {
-        ctx.beginPath()
-        ctx.moveTo(x, 0)
-        ctx.lineTo(x, canvas.height)
-        ctx.stroke()
-      }
-      const yBarIncrement = (canvas.height / 10.0)
-      for (var y = 0; y < canvas.height; y += yBarIncrement) {
-        ctx.beginPath()
-        ctx.moveTo(0, y)
-        ctx.lineTo(canvas.width, y)
-        ctx.stroke()
-      }
-
-      if ('masterScope' in e && 'scopeData' in e.masterScope) {
-        ctx.fillStyle = '#0f0'
-        ctx.strokeStyle = '#04AEF7'
-        ctx.lineWidth = 2
-
-        const cho2 = canvas.height / 2
-        const scopeData = e.masterScope.scopeData
-        const bufferLength = e.masterScope.bufferLength
-
-        const sliceWidth = canvas.width * (1.0 / (bufferLength - 1))
-        let x = 0
-        let y = (scopeData[0] / 128.0) * cho2
-
-        ctx.beginPath()
-        ctx.moveTo(x, y)
-        for (let i = 1; i < bufferLength; i += 1) {
-          y = (scopeData[i] / 128.0) * cho2
-          ctx.lineTo(x, y)
-          x += sliceWidth
+        ctx.strokeStyle = '#080'
+        ctx.lineWidth = 1
+        const xBarIncrement = (canvas.width / 10.0)
+        for (var x = 0; x < canvas.width; x += xBarIncrement) {
+          ctx.beginPath()
+          ctx.moveTo(x, 0)
+          ctx.lineTo(x, canvas.height)
+          ctx.stroke()
         }
-        ctx.stroke()
+        const yBarIncrement = (canvas.height / 10.0)
+        for (var y = 0; y < canvas.height; y += yBarIncrement) {
+          ctx.beginPath()
+          ctx.moveTo(0, y)
+          ctx.lineTo(canvas.width, y)
+          ctx.stroke()
+        }
+
+        if (e && 'masterScope' in e && 'scopeData' in e.masterScope) {
+          ctx.fillStyle = '#0f0'
+          ctx.strokeStyle = '#04AEF7'
+          ctx.lineWidth = 2
+
+          const cho2 = canvas.height / 2
+          const scopeData = e.masterScope.scopeData
+          const bufferLength = e.masterScope.bufferLength
+
+          const sliceWidth = canvas.width * (1.0 / (bufferLength - 1))
+          let x = 0
+          let y = (scopeData[0] / 128.0) * cho2
+
+          ctx.beginPath()
+          ctx.moveTo(x, y)
+          for (let i = 1; i < bufferLength; i += 1) {
+            y = (scopeData[i] / 128.0) * cho2
+            ctx.lineTo(x, y)
+            x += sliceWidth
+          }
+          ctx.stroke()
+        }
       }
     }
   },
@@ -166,7 +167,7 @@ export default {
   flex: auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
 }
 .track-title {
   color: white;
@@ -175,6 +176,7 @@ export default {
 .monitor-container, .transport-container {
   margin: 10px;
   position: relative;
+  width: 100%;
 }
 .monitor-container {
   background-color: black;

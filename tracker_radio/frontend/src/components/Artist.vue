@@ -28,7 +28,7 @@ export default {
     getRandomAvatar () {
       var index = Math.ceil(Math.random() * 6)
       var strIndex = ('000' + index).slice(-3)
-      return `static/avatar-${strIndex}.png`
+      return `/static/avatar-${strIndex}.png`
     }
   }
 }

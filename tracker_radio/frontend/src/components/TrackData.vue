@@ -14,6 +14,9 @@
           <star-rating v-model="track.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
             v-on:rating-selected="setRating($event, track.id)"></star-rating>
         </b-row>
+        <b-row>
+          <router-link :to="'/track/' + track.id"><font-awesome-icon icon="link" size="lg"/></router-link>
+        </b-row>
       </b-container>
     </b-container>
   </b-container>
