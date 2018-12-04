@@ -69,6 +69,6 @@ export default {
 }
 .artist-image-container img {
   height: 132px;
-  border-radius: 50%;
+  border-radius: 25%;
 }
 </style>
