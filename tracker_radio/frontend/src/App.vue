@@ -11,8 +11,13 @@
             </b-navbar-nav>
             <b-navbar-nav class="ml-auto">
               <b-nav-form>
-                <b-nav-item v-on:click="logout" v-if="user != null">{{ user ? user.displayName : "Not Logged In" }}</b-nav-item>
-                <b-nav-item v-if="user == null" href="/login">Login</b-nav-item>
+                <b-nav-item-dropdown v-if="user != null" no-caret>
+                  <template slot="button-content">
+                    <b-img class="avatar-image" :src="user.photoURL"></b-img>
+                  </template>
+                  <b-dropdown-item v-on:click="logout">Logout</b-dropdown-item>
+                </b-nav-item-dropdown>
+                <b-nav-item v-else href="/login">Login</b-nav-item>
               </b-nav-form>
             </b-navbar-nav>
           </b-collapse>
@@ -94,5 +99,10 @@ html body {
   flex-direction: column;
   flex-grow: 2;
   min-height: 0;
+}
+.avatar-image {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
 }
 </style>
