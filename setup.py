@@ -11,6 +11,7 @@ setup(
             'Flask-Login',
             'marshmallow',
             'requests',
-            'firebase-admin'
+            'firebase-admin',
+            'Flask-Migrate'
             ]
         )

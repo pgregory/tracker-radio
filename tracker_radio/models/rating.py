@@ -2,7 +2,7 @@ import datetime
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
-from tracker_radio.views import Account
+from .account import Account
 
 from tracker_radio import db
 

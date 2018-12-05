@@ -2,30 +2,17 @@ from functools import wraps
 
 from tracker_radio import app, db, login_manager, default_app
 from flask import render_template, request, jsonify, abort, redirect
-from flask_login import LoginManager, UserMixin, login_user, logout_user
+from flask_login import LoginManager, login_user, logout_user
 import sqlalchemy
 from sqlalchemy import func
 from random import *
 from firebase_admin import _utils, _token_gen
 
-class Account(UserMixin, db.Model):
-
-    __tablename__ = 'accounts'
-
-    account_id = db.Column(db.Integer, primary_key=True)
-    firebase_user_id = db.Column(db.Text, unique=True)
-    email = db.Column(db.Text, unique=True, nullable=False)
-    email_verified = db.Column(db.Boolean, default=False, nullable=False)
-    name = db.Column(db.Text)
-    photo_url = db.Column(db.Text)
-
-    def get_id(self):
-        return self.account_id
+from tracker_radio.models import Track, TrackSchema, Artist, ArtistSchema, Rating, Account
 
 @login_manager.user_loader
 def load_user(account_id):
     return Account.query.get(account_id)
-
 
 @login_manager.unauthorized_handler
 def authentication_required():
@@ -87,8 +74,6 @@ def catch_all(path):
 
 @app.route('/api/artists', methods=['GET'])
 def get_artists():
-    from tracker_radio.models.track import Track, TrackSchema
-    from tracker_radio.models.artist import Artist, ArtistSchema
     letter = request.args.get('letter', 'A')
     schema = ArtistSchema(many=True)
     if letter == 'All':
@@ -108,8 +93,6 @@ def get_artists():
 
 @app.route('/api/artists', methods=['POST'])
 def post_artists():
-    from tracker_radio.models.track import Track, TrackSchema
-    from tracker_radio.models.artist import Artist, ArtistSchema
     if not request.json:
         abort(400)
     schema = ArtistSchema(many=True)
@@ -124,8 +107,6 @@ def post_artists():
 
 @app.route('/api/artists/<int:artist_id>', methods=['GET'])
 def get_artist(artist_id):
-    from tracker_radio.models.track import Track, TrackSchema
-    from tracker_radio.models.artist import Artist, ArtistSchema
     schema = ArtistSchema()
     artist = Artist.get_by_id(artist_id)
     if not artist:
@@ -134,8 +115,6 @@ def get_artist(artist_id):
 
 @app.route('/api/artists/<int:artist_id>/tracks', methods=['GET'])
 def get_artist_tracks(artist_id):
-    from tracker_radio.models.track import Track, TrackSchema
-    from tracker_radio.models.artist import Artist, ArtistSchema
     schema = TrackSchema(many=True)
     artist = Artist.query.filter_by(id=artist_id).first()
     if not artist:
@@ -145,14 +124,12 @@ def get_artist_tracks(artist_id):
 
 @app.route('/api/tracks', methods=['GET'])
 def get_tracks():
-    from tracker_radio.models.track import Track, TrackSchema
     schema = TrackSchema(many=True)
     tracks = Track.query.order_by(Track.title).fetch(5)
     return schema.dumps(tracks)
 
 @app.route('/api/tracks/<int:track_id>', methods=['GET'])
 def get_track(track_id):
-    from tracker_radio.models.track import Track, TrackSchema
     schema = TrackSchema()
     track = Track.query.filter_by(id=track_id).first()
     if track:
@@ -162,7 +139,6 @@ def get_track(track_id):
 
 @app.route('/api/tracks', methods=['POST'])
 def post_tracks():
-    from tracker_radio.models.track import Track, TrackSchema
     if not request.json:
         abort(400)
     schema = TrackSchema(many=True)
@@ -182,7 +158,6 @@ def post_tracks():
 @app.route('/api/tracks/<int:track_id>/rate', methods=['POST'])
 @token_required
 def rate_track(user, track_id):
-    from tracker_radio.models.rating import Rating
     data = request.json
     rating = Rating.query.filter_by(track_id=track_id, user_id=user.account_id).first()
     if rating:
