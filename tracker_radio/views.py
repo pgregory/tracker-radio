@@ -8,7 +8,8 @@ from sqlalchemy import func
 from random import *
 from firebase_admin import _utils, _token_gen
 
-from tracker_radio.models import Track, TrackSchema, Artist, ArtistSchema, Rating, Account
+from tracker_radio.models import (Track, TrackSchema, Artist, 
+        ArtistSchema, Rating, Account, Favourite)
 
 @login_manager.user_loader
 def load_user(account_id):
@@ -167,6 +168,27 @@ def rate_track(user, track_id):
     db.session.add(rating)
     db.session.commit()
     return jsonify({'success': True}), 201
+
+@app.route('/api/tracks/<int:track_id>/favourite', methods=['POST'])
+@token_required
+def favourite_track(user, track_id):
+    data = request.json
+    favourite = Favourite.query.filter_by(track_id=track_id, user_id=user.account_id).first()
+    if not favourite:
+        favourite = Favourite(track_id=track_id, user_id=user.account_id)
+        db.session.add(favourite)
+        db.session.commit()
+    return jsonify({'success': True}), 201
+
+@app.route('/api/tracks/<int:track_id>/favourite', methods=['GET'])
+@token_required
+def get_track_is_favourite(user, track_id):
+    favourite = Favourite.query.filter_by(track_id=track_id, user_id=user.account_id).count()
+    if favourite:
+        return jsonify({'favourite': True}), 200
+    else:
+        return jsonify({'favourite': False}), 200
+
 
 @app.route('/api/signin', methods=['POST'])
 def signin():

@@ -10,13 +10,14 @@
         <b-row>
           <p class="track-title">{{track.title}}</p>
         </b-row>
-        <b-row>
+        <b-row class="ratings">
           <star-rating v-model="track.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
             v-on:rating-selected="setRating($event, track.id)"></star-rating>
+          <font-awesome-icon icon="heart" size="lg" class="favourite" v-bind:class="{ is_favourite: isFavourite }"
+            v-on:click="setFavourite(track.id)"
+            v-b-tooltip.hover title="Favourite"/>
         </b-row>
-        <b-row>
-          <router-link :to="'/track/' + track.id"><font-awesome-icon icon="link" size="lg"/></router-link>
-        </b-row>
+        <router-link class="permalink" :to="'/track/' + track.id"><font-awesome-icon icon="link" size="lg"/></router-link>
       </b-container>
     </b-container>
   </b-container>
@@ -30,7 +31,8 @@ import firebase from 'firebase'
 export default {
   data () {
     return {
-      track: null
+      track: null,
+      isFavourite: false
     }
   },
   props: {
@@ -46,6 +48,7 @@ export default {
     getTrackData () {
       if (this.trackId) {
         const path = process.env.API_BASE_URL + `api/tracks/${this.trackId}`
+        const favPath = process.env.API_BASE_URL + `api/tracks/${this.trackId}/favourite`
         axios.get(path)
           .then(response => {
             this.track = response.data
@@ -53,6 +56,19 @@ export default {
           .catch(error => {
             console.log(error)
           })
+        const user = firebase.auth().currentUser
+        if (user) {
+          var self = this
+          user.getIdToken(true).then(function (idToken) {
+            axios.get(favPath, { headers: { 'Authorization': 'bearer ' + idToken } })
+              .then(response => {
+                self.isFavourite = response.data['favourite']
+              })
+              .catch(error => {
+                console.log(error)
+              })
+          })
+        }
       }
     },
     getTrackLocation (track) {
@@ -69,6 +85,22 @@ export default {
           }, { headers: { 'Authorization': 'bearer ' + idToken } })
             .then(function (response) {
               console.log(response)
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
+    },
+    setFavourite (track) {
+      const path = process.env.API_BASE_URL + `api/tracks/` + track + `/favourite`
+      const user = firebase.auth().currentUser
+      var self = this
+      if (user) {
+        user.getIdToken(true).then(function (idToken) {
+          axios.post(path, {},
+            { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.isFavourite = true
             }).catch(function (error) {
               console.log(error)
             })
@@ -108,6 +140,7 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative;
 }
 .track-title {
   color: white;
@@ -115,5 +148,24 @@ export default {
 }
 .track-play {
   font-size: 48px;
+}
+.ratings {
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+}
+.favourite {
+  color: grey;
+}
+.favourite:hover {
+  color: salmon;
+}
+.favourite.is_favourite {
+  color: red;
+}
+.permalink {
+  position: absolute;
+  right: 5px;
+  top: 5px;
 }
 </style>
