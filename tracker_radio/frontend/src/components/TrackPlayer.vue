@@ -14,9 +14,9 @@
           </div>
         </b-row>
         <b-row id="monitors">
-          <div class="monitor-container">
+          <div ref="monitor-container" class="monitor-container">
             <div class="monitor-border"></div>
-            <canvas ref="monitor" style="width:100%;height:100%;" class="monitor-canvas"></canvas>
+            <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
           </div>
         </b-row>
       </b-container>
@@ -133,8 +133,14 @@ export default {
   },
   mounted () {
     var canvas = this.$refs['monitor']
-    canvas.width = canvas.offsetWidth
-    canvas.height = canvas.offsetHeight
+    var container = this.$refs['monitor-container']
+    // canvas.width = canvas.offsetWidth
+    // canvas.height = canvas.offsetHeight
+    canvas.width = container.offsetWidth
+    canvas.height = container.offsetHeight
+    canvas.style.width = container.offsetWidth
+    canvas.style.height = container.offsetHeight
+    console.log(canvas.height)
     state.set({
       transport: {
         masterVolume: -10.0
@@ -177,6 +183,7 @@ export default {
   margin: 10px;
   position: relative;
   width: 100%;
+  display: flex;
 }
 .monitor-container {
   background-color: black;
@@ -196,5 +203,7 @@ export default {
 }
 .monitor-container canvas {
   border-radius: 5px;
+  height: 100%;
+  width: 100%;
 }
 </style>
