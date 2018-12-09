@@ -27,6 +27,36 @@
     <div id="page">
       <router-view :user="user"></router-view>
     </div>
+    <div id="feedback-button" v-b-modal.modal1>
+      Feedback
+    </div>
+    <!-- Feedback Modal -->
+    <b-modal id="modal1" title="Your Feedback is Welcome"
+      ok-disabled cancel-disabled>
+      <b-form @submit="onSubmitFeedback" @reset="onResetFeedback">
+        <b-form-group id="feedbackEmailGroup" label="Email address"
+                                              label-for="feedbackEmailInput"
+                                              v-if="user == null">
+          <b-form-input id="feedbackEmailInput"
+            v-model="feedbackEmail"
+            type="email"
+            placeholder="Enter email"
+            required>
+          </b-form-input>
+        </b-form-group>
+        <b-form-group id="feedbackContentGroup" label="Enter your comments"
+                                                label-for="feedbackContentTextArea">
+          <b-form-textarea id="feedbackContentTextArea"
+            v-model="feedbackContent"
+            placeholder="Enter your comments"
+            :rows="5">
+          </b-form-textarea>
+        </b-form-group>
+        <b-button type="submit" variant="primary">Submit</b-button>
+        <b-button type="reset" variant="danger">Reset</b-button>
+      </b-form>
+      <div slot="modal-footer"></div>
+    </b-modal>
   </div>
 </template>
 
@@ -40,7 +70,9 @@ export default {
   name: 'App',
   data () {
     return {
-      user: null
+      user: null,
+      feedbackEmail: '',
+      feedbackContent: ''
     }
   },
   mounted: function () {
@@ -48,6 +80,7 @@ export default {
     firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         self.user = user
+        self.feedbackEmail = user.email
         user.getIdToken(true).then(function (idToken) {
           const path = process.env.API_BASE_URL + `api/signin`
           axios.post(path, {
@@ -58,6 +91,7 @@ export default {
         })
       } else {
         self.user = null
+        self.feedbackEmail = ''
       }
     })
   },
@@ -70,6 +104,35 @@ export default {
       }, function (error) {
         console.log(error)
       })
+    },
+    onSubmitFeedback (evt) {
+      evt.preventDefault()
+      alert(JSON.stringify({email: this.feedbackEmail, content: this.feedbackContent}))
+      const path = process.env.API_BASE_URL + `api/feedback`
+      const user = firebase.auth().currentUser
+      if (user) {
+        var self = this
+        user.getIdToken(true).then(function (idToken) {
+          axios.post(path, {
+            email: self.feedbackEmail,
+            content: self.feedbackContent
+          }, { headers: { 'Authorization': 'bearer ' + idToken } }).then(function (response) {
+            console.log(response)
+          })
+        })
+      } else {
+        axios.post(path, {
+          email: this.feedbackEmail,
+          content: this.feedbackContent
+        }).then(function (response) {
+          console.log(response)
+        })
+      }
+    },
+    onResetFeedback (evt) {
+      evt.preventDefault()
+      this.feedbackEmail = ''
+      this.feedbackContent = ''
     }
   }
 }
@@ -92,6 +155,7 @@ html body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 #page {
@@ -104,5 +168,17 @@ html body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+}
+#feedback-button {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: rotate(270deg);
+  transform-origin: right bottom;
+  background-color: white;
+  border: 1px solid black;
+  color: black;
+  padding: 5px 5px 0 5px;
+  border-radius: 5px 5px 0 0;
 }
 </style>

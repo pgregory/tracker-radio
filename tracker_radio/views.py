@@ -9,7 +9,7 @@ from random import *
 from firebase_admin import _utils, _token_gen
 
 from tracker_radio.models import (Track, TrackSchema, Artist, 
-        ArtistSchema, Rating, Account, Favourite)
+        ArtistSchema, Rating, Account, Favourite, Feedback)
 
 @login_manager.user_loader
 def load_user(account_id):
@@ -18,6 +18,34 @@ def load_user(account_id):
 @login_manager.unauthorized_handler
 def authentication_required():
     return auth.url_for('widget', mode='select', next=request.url)
+
+class AuthenticationError(Exception):
+    CODE_INVALID = 0
+    CODE_EXPIRED = 1
+
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+def get_user_from_token(request):
+    auth_headers = request.headers.get('Authorization', '').split()
+
+    if len(auth_headers) != 2:
+        raise AuthenticationError(AuthenticationError.CODE_INVALID, 
+                'Invalid Authorization header')
+
+    try:
+        token = auth_headers[1]
+        token_verifier = _token_gen.TokenVerifier(default_app)
+        verified_claims = token_verifier.verify_id_token(token)
+        user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
+        if not user:
+            raise AuthenticationError(AuthenticationError.CODE_INVALID, 
+                    'User not found')
+        return user
+    except ValueError as e:
+        raise AuthenticationError(AuthenticationError.CODE_INVALID, str(e))
+
 
 def token_required(f):  
     @wraps(f)
@@ -33,22 +61,12 @@ def token_required(f):
             'authenticated': False
         }
 
-        if len(auth_headers) != 2:
-            return jsonify(invalid_msg), 401
-
         try:
-            token = auth_headers[1]
-            token_verifier = _token_gen.TokenVerifier(default_app)
-            verified_claims = token_verifier.verify_id_token(token)
-            user = Account.query.filter_by(firebase_user_id=verified_claims['uid']).first()
-            if not user:
-                raise RuntimeError('User not found')
+            user = get_user_from_token(request)
             return f(user, *args, **kwargs)
-        #except jwt.ExpiredSignatureError:
-        #    return jsonify(expired_msg), 401 # 401 is Unauthorized HTTP status code
-        except ValueError as e:
-            print(e)
-            return jsonify(invalid_msg), 401
+        except AuthenticationError as e:
+            if e.code == CODE_INVALID:
+                return jsonify(invalid_msg), 401
 
     return _verify
 
@@ -189,6 +207,23 @@ def get_track_is_favourite(user, track_id):
     else:
         return jsonify({'favourite': False}), 200
 
+@app.route('/api/feedback', methods=['POST'])
+def feedback():
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
+    data = request.json
+    print(data)
+    feedback = Feedback(content=data['content'])
+    if 'email' in data:
+        feedback.email = data['email']
+    if user:
+        feedback.user_id = user.account_id
+    db.session.add(feedback)
+    db.session.commit()
+    return jsonify({'success': True}), 200
 
 @app.route('/api/signin', methods=['POST'])
 def signin():

@@ -7,7 +7,7 @@
     </b-row>
     <b-container id="track-player">
       <b-container class="track-player-inner">
-        <b-row>
+        <b-row id="transport-row">
           <div class="transport-container">
             <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
             <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
@@ -205,5 +205,8 @@ export default {
   border-radius: 5px;
   height: 100%;
   width: 100%;
+}
+#transport-row {
+  flex-shrink: 0;
 }
 </style>
