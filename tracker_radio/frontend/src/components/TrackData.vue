@@ -17,7 +17,15 @@
             v-on:click="setFavourite(track.id)"
             v-b-tooltip.hover title="Favourite"/>
         </b-row>
-        <router-link class="permalink" :to="'/track/' + track.id"><font-awesome-icon icon="link" size="lg"/></router-link>
+        <b-row class="wetracker">
+          <a :href="getTrackLocation(track)" target="_blank"><b-img src="/static/logo_small.png"
+              width="80px"
+              v-b-tooltip.hover title="Open in WeTracker"/></a>
+        </b-row>
+        <router-link class="permalink" :to="'/track/' + track.id"><font-awesome-icon
+            icon="link"
+            size="lg"
+            v-b-tooltip.hover title="Shareable Link"/></router-link>
       </b-container>
     </b-container>
   </b-container>
@@ -72,8 +80,9 @@ export default {
       }
     },
     getTrackLocation (track) {
+      const playerRoot = 'http://app.wetracker.xyz/#/loadsong?play=1&url='
       var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
-      return url
+      return playerRoot + url
     },
     setRating (rating, track) {
       const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
@@ -167,5 +176,10 @@ export default {
   position: absolute;
   right: 5px;
   top: 5px;
+}
+.wetracker {
+  flex: 1;
+  justify-content: center;
+  align-items: center;
 }
 </style>

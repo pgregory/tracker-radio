@@ -184,6 +184,8 @@ export default {
   position: relative;
   width: 100%;
   display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .monitor-container {
   background-color: black;
