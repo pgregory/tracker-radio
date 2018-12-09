@@ -35,9 +35,11 @@ export default {
 </script>
 
 <style scoped>
+.artist-container {
+  padding: 10px;
+}
 .artist {
   border: 2px solid rgb(0,255,0);
-  width: 200px;
   height: 100%;
   flex-basis: auto;
   border-radius: 5px;

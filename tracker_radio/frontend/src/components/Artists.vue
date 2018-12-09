@@ -13,9 +13,9 @@
         <b-form-input v-model="search_string" type="text" placeholder="Search"></b-form-input>
         <b-button v-on:click="search_string = ''">X</b-button>
       </b-row>
-      <b-row class="artists">
-        <b-col class="artist" v-for="artist in filteredArtists()" v-bind:key="artist.id">
-          <div class="dummy"></div>
+      <b-row ref="artists" class="artists">
+        <b-col ref="artist" class="artist" v-for="artist in filteredArtists()" v-bind:key="artist.id">
+          <!--<div class="dummy"></div>-->
           <artist v-bind:artist="artist" v-on:artist-selected="artistId = artist.id"/>
         </b-col>
         <template v-if="filteredArtists().length < 5">
@@ -25,6 +25,8 @@
         </b-col>
         </template>
       </b-row>
+      <div id="prev-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-circle-left" size="1x"/></div>
+      <div id="next-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-circle-right" size="1x"/></div>
     </b-container>
     <b-container id="track-panel">
       <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
@@ -36,6 +38,7 @@
 
 <script>
 import axios from 'axios'
+import VueScrollTo from 'vue-scrollto'
 import Artist from './Artist.vue'
 import TrackList from './TrackList.vue'
 import TrackData from './TrackData.vue'
@@ -85,6 +88,32 @@ export default {
     selectLetter (letter) {
       this.current_letter = letter
       this.getArtists()
+    },
+    scrollLeft () {
+      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
+      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
+      var target = Math.min(currentFirst + scrollCount, this.$refs['artist'].length)
+      var options = {
+        container: this.$refs['artists'],
+        easing: 'ease-in-out',
+        force: true,
+        x: true,
+        y: false
+      }
+      VueScrollTo.scrollTo(this.$refs['artist'][target], 500, options)
+    },
+    scrollRight () {
+      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
+      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
+      var target = Math.max(currentFirst - scrollCount, 0)
+      var options = {
+        container: this.$refs['artists'],
+        easing: 'ease-in-out',
+        force: true,
+        x: true,
+        y: false
+      }
+      VueScrollTo.scrollTo(this.$refs['artist'][target], 500, options)
     }
   },
   components: {
@@ -111,6 +140,7 @@ export default {
 }
 #artists-panel {
   flex: none;
+  position: relative;
 }
 #artists-panel .row {
   overflow-x: auto;
@@ -119,18 +149,31 @@ export default {
 #artists-panel .row.artists {
   min-height: 200px;
 }
+#prev-button, #next-button {
+  position: absolute;
+  top: 50%;
+  font-size: 50px;
+  color: rgba(128,128,128,0.8);
+  margin: auto;
+}
+#prev-button {
+  left: -0.5em;
+}
+#next-button {
+  right: -0.5em;
+}
 .artist {
   min-width: 200px;
-  margin: 5px;
+  /* margin: 5px; */
 }
 .artist-container {
   position: absolute;
   top: 5px;
   bottom: 0;
   right: 0;
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-bottom: 15px;
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
   width: 100%;
 }
 #track-panel {
