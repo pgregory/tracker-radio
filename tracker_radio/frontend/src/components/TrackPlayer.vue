@@ -1,10 +1,5 @@
 <template>
   <b-container id="track">
-    <b-row id="track-player-title">
-      <b-col>
-        <p>Playing</p>
-      </b-col>
-    </b-row>
     <b-container id="track-player">
       <b-container class="track-player-inner">
         <b-row id="transport-row">
@@ -163,6 +158,7 @@ export default {
   -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   margin-bottom: 15px;
+  margin-top: 15px;
   flex: auto;
   background-color: #212529;
   padding: 0;

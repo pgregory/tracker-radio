@@ -1,10 +1,5 @@
 <template>
   <b-container id="tracks">
-    <b-row id="tracks-title">
-      <b-col>
-        <p>Tracks</p>
-      </b-col>
-    </b-row>
     <b-container id="track-list">
       <b-table striped hover :items="tracks" :fields="track_fields"
         dark
@@ -92,6 +87,7 @@ export default {
   -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   margin-bottom: 15px;
+  margin-top: 15px;
   flex: auto;
   background-color: #212529;
   padding: 0;

@@ -1,10 +1,5 @@
 <template>
   <b-container id="track">
-    <b-row id="track-data-title">
-      <b-col>
-        <p>Track</p>
-      </b-col>
-    </b-row>
     <b-container id="track-data">
       <b-container class="track-data-inner" v-if="track">
         <b-row>
@@ -138,6 +133,7 @@ export default {
   -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
   margin-bottom: 15px;
+  margin-top: 15px;
   flex: auto;
   background-color: #212529;
   padding: 0;

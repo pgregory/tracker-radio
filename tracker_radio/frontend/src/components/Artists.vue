@@ -3,7 +3,6 @@
 <template>
   <div id="content">
     <b-container id="artists-panel">
-      <p>Artists</p>
       <b-row class="letters">
         <b-col class="letter" v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
           <span>{{ letter }}</span>
@@ -141,6 +140,7 @@ export default {
 #artists-panel {
   flex: none;
   position: relative;
+  margin-top: 10px;
 }
 #artists-panel .row {
   overflow-x: auto;
