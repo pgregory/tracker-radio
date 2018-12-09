@@ -35,9 +35,6 @@ export default {
 </script>
 
 <style scoped>
-.artist-container {
-  padding: 10px;
-}
 .artist {
   border: 2px solid rgb(0,255,0);
   height: 100%;

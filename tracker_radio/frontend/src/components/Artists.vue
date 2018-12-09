@@ -171,8 +171,8 @@ export default {
   top: 5px;
   bottom: 0;
   right: 0;
-  padding-left: 0;
-  padding-right: 0;
+  padding-left: 10px;
+  padding-right: 10px;
   padding-bottom: 0;
   width: 100%;
 }
