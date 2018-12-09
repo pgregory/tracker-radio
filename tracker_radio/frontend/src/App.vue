@@ -31,7 +31,7 @@
       Feedback
     </div>
     <!-- Feedback Modal -->
-    <b-modal id="modal1" title="Your Feedback is Welcome"
+    <b-modal ref="feedbackModal" id="modal1" title="Your Feedback is Welcome"
       ok-disabled cancel-disabled>
       <b-form @submit="onSubmitFeedback" @reset="onResetFeedback">
         <b-form-group id="feedbackEmailGroup" label="Email address"
@@ -107,7 +107,6 @@ export default {
     },
     onSubmitFeedback (evt) {
       evt.preventDefault()
-      alert(JSON.stringify({email: this.feedbackEmail, content: this.feedbackContent}))
       const path = process.env.API_BASE_URL + `api/feedback`
       const user = firebase.auth().currentUser
       if (user) {
@@ -118,6 +117,7 @@ export default {
             content: self.feedbackContent
           }, { headers: { 'Authorization': 'bearer ' + idToken } }).then(function (response) {
             console.log(response)
+            self.$refs.feedbackModal.hide()
           })
         })
       } else {
@@ -126,6 +126,7 @@ export default {
           content: this.feedbackContent
         }).then(function (response) {
           console.log(response)
+          self.$refs.feedbackModal.hide()
         })
       }
     },
