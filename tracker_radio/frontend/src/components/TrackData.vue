@@ -1,8 +1,8 @@
 <template>
   <b-container id="track">
-    <b-row id="track-data-title">
+    <b-row id="track-data-title" class="panel-title">
       <b-col>
-        <p>Track</p>
+        <span>Track</span>
       </b-col>
     </b-row>
     <b-container id="track-data">

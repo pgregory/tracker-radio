@@ -3,7 +3,11 @@
 <template>
   <div id="content">
     <b-container id="artists-panel">
-      <p>Artists</p>
+      <b-row id="artists-title" class="panel-title">
+        <b-col>
+          <span>Artists</span>
+        </b-col>
+      </b-row>
       <b-row class="letters">
         <b-col class="letter" v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
           <span>{{ letter }}</span>
@@ -148,6 +152,8 @@ export default {
 }
 #artists-panel .row.artists {
   min-height: 200px;
+  padding-bottom: 10px;
+  padding-top: 10px;
 }
 #prev-button, #next-button {
   position: absolute;
@@ -165,6 +171,7 @@ export default {
 .artist {
   min-width: 200px;
   /* margin: 5px; */
+  max-width: 200px;
 }
 .artist-container {
   position: absolute;

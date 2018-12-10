@@ -182,4 +182,8 @@ html body {
   padding: 5px 5px 0 5px;
   border-radius: 5px 5px 0 0;
 }
+.panel-title {
+  color: white;
+  font-size: 28px;
+}
 </style>
