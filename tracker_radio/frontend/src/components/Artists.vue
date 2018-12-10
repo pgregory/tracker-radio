@@ -18,19 +18,18 @@
         <b-button v-on:click="search_string = ''">X</b-button>
       </b-row>
       <b-row ref="artists" class="artists">
-        <b-col ref="artist" class="artist" v-for="artist in filteredArtists()" v-bind:key="artist.id">
-          <!--<div class="dummy"></div>-->
+        <b-col ref="artist" class="artist" v-for="(artist, index) in filteredArtists()" v-bind:key="artist.id" :data-index="index">
           <artist v-bind:artist="artist" v-on:artist-selected="artistId = artist.id"/>
         </b-col>
-        <template v-if="filteredArtists().length < 5">
+        <!--<template v-if="filteredArtists().length < 5">
         <b-col class="artist empty" v-for="n in (5 - filteredArtists().length)" v-bind:key="n">
           <div class="dummy"></div>
           <artist empty/>
         </b-col>
-        </template>
+        </template>-->
       </b-row>
-      <div id="prev-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-circle-left" size="1x"/></div>
-      <div id="next-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-circle-right" size="1x"/></div>
+      <div id="prev-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-circle-left" size="1x"/></div>
+      <div id="next-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-circle-right" size="1x"/></div>
     </b-container>
     <b-container id="track-panel">
       <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
@@ -97,6 +96,7 @@ export default {
       var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
       var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
       var target = Math.min(currentFirst + scrollCount, this.$refs['artist'].length)
+      var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
       var options = {
         container: this.$refs['artists'],
         easing: 'ease-in-out',
@@ -104,12 +104,13 @@ export default {
         x: true,
         y: false
       }
-      VueScrollTo.scrollTo(this.$refs['artist'][target], 500, options)
+      VueScrollTo.scrollTo(targetElement, 500, options)
     },
     scrollRight () {
       var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
       var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
       var target = Math.max(currentFirst - scrollCount, 0)
+      var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
       var options = {
         container: this.$refs['artists'],
         easing: 'ease-in-out',
@@ -117,7 +118,7 @@ export default {
         x: true,
         y: false
       }
-      VueScrollTo.scrollTo(this.$refs['artist'][target], 500, options)
+      VueScrollTo.scrollTo(targetElement, 500, options)
     }
   },
   components: {
