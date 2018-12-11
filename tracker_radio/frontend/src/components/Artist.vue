@@ -23,6 +23,13 @@ export default {
   },
   methods: {
     click () {
+      this.$gtm.trackEvent({
+        event: 'artist-selected',
+        action: 'select',
+        category: 'Artist',
+        label: 'Artist Selected',
+        artist_id: this.artist.id
+      })
       this.$emit('artist-selected')
     },
     getRandomAvatar () {

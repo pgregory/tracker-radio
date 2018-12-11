@@ -65,6 +65,13 @@ export default {
       return url
     },
     loadSong (track) {
+      this.$gtm.trackEvent({
+        event: 'track-play',
+        action: 'play',
+        category: 'Track',
+        label: 'Play Track',
+        track_id: track.id
+      })
       var url = this.getTrackLocation(track)
       player.stop()
       song.downloadSong(url).then(() => {
@@ -72,6 +79,13 @@ export default {
       })
     },
     stopSong () {
+      this.$gtm.trackEvent({
+        event: 'track-stop',
+        action: 'stop',
+        category: 'Track',
+        label: 'Stop Track',
+        track_id: this.trackId
+      })
       player.stop()
     },
     onTracksChanged (tracks) {

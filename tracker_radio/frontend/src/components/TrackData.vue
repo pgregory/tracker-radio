@@ -55,6 +55,13 @@ export default {
   methods: {
     getTrackData () {
       if (this.trackId) {
+        this.$gtm.trackEvent({
+          event: 'track-selected',
+          action: 'select',
+          category: 'Track',
+          label: 'Track Selected',
+          track_id: this.trackId
+        })
         const path = process.env.API_BASE_URL + `api/tracks/${this.trackId}`
         const favPath = process.env.API_BASE_URL + `api/tracks/${this.trackId}/favourite`
         axios.get(path)
@@ -87,8 +94,17 @@ export default {
     setRating (rating, track) {
       const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
       const user = firebase.auth().currentUser
+      const self = this
       if (user) {
         user.getIdToken(true).then(function (idToken) {
+          self.$gtm.trackEvent({
+            event: 'track-rate',
+            action: 'rate',
+            category: 'Track',
+            label: 'Track Rated',
+            track_id: track,
+            rating: rating
+          })
           axios.post(path, {
             rating: rating
           }, { headers: { 'Authorization': 'bearer ' + idToken } })
@@ -103,9 +119,17 @@ export default {
     setFavourite (track) {
       const path = process.env.API_BASE_URL + `api/tracks/` + track + `/favourite`
       const user = firebase.auth().currentUser
-      var self = this
+      const self = this
       if (user) {
         user.getIdToken(true).then(function (idToken) {
+          console.log(user)
+          self.$gtm.trackEvent({
+            event: 'track-favourite',
+            action: 'favourite',
+            category: 'Track',
+            label: 'Track Favourited',
+            track_id: track
+          })
           axios.post(path, {},
             { headers: { 'Authorization': 'bearer ' + idToken } })
             .then(function (response) {

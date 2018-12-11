@@ -1,6 +1,7 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+import VueGtm from 'vue-gtm'
 import BootstrapVue from 'bootstrap-vue'
 import '../node_modules/firebaseui/dist/firebaseui.css'
 import App from './App'
@@ -21,6 +22,12 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)
+Vue.use(VueGtm, {
+  id: 'GTM-5QXM7D3',
+  enabled: true,
+  debug: true,
+  vueRouter: router
+})
 
 // Initialize Firebase
 var config = {
