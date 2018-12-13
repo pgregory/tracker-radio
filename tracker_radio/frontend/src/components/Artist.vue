@@ -1,5 +1,16 @@
 <template>
-  <b-container class="artist-container" v-on:click="click">
+  <b-card :title="artist.name"
+          :img-src="getRandomAvatar()"
+          img-alt="Image"
+          img-top
+          no-body
+          style="min-width: 10rem"
+          border-variant="light"
+          class="artist mb-2 mx-1"
+          v-on:click="click">
+    {{ artist.name }}
+  </b-card>
+  <!--<b-container class="artist-container" v-on:click="click">
     <b-container class="artist" v-bind:class="{ empty: empty }">
       <b-row class="artist-name">
         <span v-if="artist">
@@ -12,7 +23,7 @@
         </div>
       </b-row>
     </b-container>
-  </b-container>
+  </b-container>-->
 </template>
 
 <script>
@@ -43,7 +54,7 @@ export default {
 
 <style scoped>
 .artist {
-  border: 2px solid rgb(0,255,0);
+  /*border: 2px solid rgb(0,255,0);
   height: 100%;
   flex-basis: auto;
   border-radius: 5px;
@@ -53,7 +64,8 @@ export default {
   background-color: #212529;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center;*/
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
 }
 .artist.empty {
   background-color: lightslategrey;

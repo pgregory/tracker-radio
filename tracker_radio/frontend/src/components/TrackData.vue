@@ -1,34 +1,32 @@
 <template>
-  <b-container id="track">
-    <b-row id="track-data-title" class="panel-title">
-      <b-col>
-        <span>Track</span>
-      </b-col>
-    </b-row>
-    <b-container id="track-data">
-      <b-container class="track-data-inner" v-if="track">
-        <b-row>
-          <p class="track-title">{{track.title}}</p>
-        </b-row>
-        <b-row class="ratings">
-          <star-rating v-model="track.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
-            v-on:rating-selected="setRating($event, track.id)"></star-rating>
-          <font-awesome-icon icon="heart" size="lg" class="favourite" v-bind:class="{ is_favourite: isFavourite }"
-            v-on:click="setFavourite(track.id)"
-            v-b-tooltip.hover title="Favourite"/>
-        </b-row>
-        <b-row class="wetracker">
-          <a :href="getTrackLocation(track)" target="_blank"><b-img src="/static/logo_small.png"
-              width="80px"
-              v-b-tooltip.hover title="Open in WeTracker"/></a>
-        </b-row>
-        <router-link class="permalink" :to="'/track/' + track.id"><font-awesome-icon
-            icon="link"
-            size="lg"
-            v-b-tooltip.hover title="Shareable Link"/></router-link>
-      </b-container>
-    </b-container>
-  </b-container>
+  <b-card id="track"
+          class="panel"
+          no-body
+          header="Track">
+    <b-card-body class="track-data" v-if="track">
+      <b-row no-gutters>
+        <p class="track-title">{{track.title}}</p>
+      </b-row>
+      <b-row no-gutters class="ratings">
+        <star-rating v-model="track.average_rating" v-bind:star-size="20" v-bind:read-only="user == null"
+          v-on:rating-selected="setRating($event, track.id)"></star-rating>
+        <font-awesome-icon icon="heart" size="lg" class="favourite" v-bind:class="{ is_favourite: isFavourite }"
+          v-on:click="setFavourite(track.id)"
+          v-b-tooltip.hover title="Favourite"/>
+      </b-row>
+      <b-row no-gutters class="wetracker">
+        <a :href="getTrackLocation(track)" target="_blank">
+          <b-img thumbnail src="/static/logo_small.png"
+            width="80px"
+            v-b-tooltip.hover title="Open in WeTracker"/>
+        </a>
+      </b-row>
+      <router-link class="permalink" :to="'/track/' + track.id"><font-awesome-icon
+          icon="link"
+          size="lg"
+          v-b-tooltip.hover title="Shareable Link"/></router-link>
+    </b-card-body>
+  </b-card>
 </template>
 
 <script>
@@ -151,41 +149,18 @@ export default {
 </script>
 
 <style scoped>
-#track-data-title {
-  flex-shrink: 0;
-}
-#track-data  {
-  overflow-y: scroll;
-  border: 2px solid rgb(0,255,0);
-  border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  margin-bottom: 15px;
-  flex: auto;
-  background-color: #212529;
-  padding: 0;
+.track-data {
   display: flex;
   flex-direction: column;
-}
-#track-data .track-data-inner  {
-  flex: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   position: relative;
 }
 .track-title {
-  color: white;
+  color: black;
   font-size: 28px;
-}
-.track-play {
-  font-size: 48px;
 }
 .ratings {
   align-items: center;
   justify-content: space-around;
-  width: 100%;
 }
 .favourite {
   color: grey;
@@ -205,5 +180,8 @@ export default {
   flex: 1;
   justify-content: center;
   align-items: center;
+}
+.wetracker img {
+  background-color: black;
 }
 </style>

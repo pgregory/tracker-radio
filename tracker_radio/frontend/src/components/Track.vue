@@ -3,8 +3,14 @@
 <template>
   <div id="content">
     <b-container id="track-panel">
-      <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
-      <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
+      <b-row>
+        <b-col sm="6">
+          <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
+        </b-col>
+        <b-col sm="6">
+          <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
+        </b-col>
+      </b-row>
     </b-container>
   </div>
 </template>
@@ -47,11 +53,13 @@ export default {
   display: flex;
   flex-direction: row;
   min-height: 0;
+  margin-bottom: 10px;
+  margin-top: 10px;
 }
-#tracks, #track {
+#track-panel .row {
   flex: auto;
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
+}
+.panel {
+  height: 100%;
 }
 </style>

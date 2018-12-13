@@ -18,23 +18,28 @@
         <b-button v-on:click="search_string = ''">X</b-button>
       </b-row>
       <b-row ref="artists" class="artists">
-        <b-col ref="artist" class="artist" v-for="(artist, index) in filteredArtists()" v-bind:key="artist.id" :data-index="index">
-          <artist v-bind:artist="artist" v-on:artist-selected="artistId = artist.id"/>
-        </b-col>
-        <!--<template v-if="filteredArtists().length < 5">
-        <b-col class="artist empty" v-for="n in (5 - filteredArtists().length)" v-bind:key="n">
-          <div class="dummy"></div>
-          <artist empty/>
-        </b-col>
-        </template>-->
+        <b-card-group deck class="artist-list d-flex flex-nowrap mx-0">
+          <!--<b-col ref="artist" class="artist" v-for="(artist, index) in filteredArtists()" v-bind:key="artist.id" :data-index="index">
+            <artist v-bind:artist="artist" v-on:artist-selected="artistId = artist.id"/>
+            </b-col>-->
+            <artist v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" :artist="artist" v-on:artist-selected="artistId = artist.id"/>
+        </b-card-group>
       </b-row>
-      <div id="prev-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-circle-left" size="1x"/></div>
-      <div id="next-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-circle-right" size="1x"/></div>
+      <div id="prev-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-left" size="1x"/></div>
+      <div id="next-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-right" size="1x"/></div>
     </b-container>
     <b-container id="track-panel">
-      <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
-      <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
-      <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
+      <b-row>
+        <b-col sm="4">
+          <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
+        </b-col>
+        <b-col sm="4">
+          <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
+        </b-col>
+        <b-col sm="4">
+          <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
+        </b-col>
+      </b-row>
     </b-container>
   </div>
 </template>
@@ -92,9 +97,17 @@ export default {
       this.current_letter = letter
       this.getArtists()
     },
+    outerWidth (el) {
+      var width = el.offsetWidth
+      var style = getComputedStyle(el)
+
+      width += parseInt(style.marginLeft) + parseInt(style.marginRight)
+      return width
+    },
     scrollLeft () {
-      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
-      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
+      var itemWidth = this.outerWidth(this.$refs['artist'][0].$el)
+      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / itemWidth)
+      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / itemWidth)
       var target = Math.min(currentFirst + scrollCount, this.$refs['artist'].length)
       var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
       var options = {
@@ -107,8 +120,9 @@ export default {
       VueScrollTo.scrollTo(targetElement, 500, options)
     },
     scrollRight () {
-      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / 200)
-      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / 200)
+      var itemWidth = this.outerWidth(this.$refs['artist'][0].$el)
+      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / itemWidth)
+      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / itemWidth)
       var target = Math.max(currentFirst - scrollCount, 0)
       var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
       var options = {
@@ -140,16 +154,36 @@ export default {
   flex: auto;
   min-height: 0;
 }
-.dummy {
-  margin-top: 100%;
-}
 #artists-panel {
   flex: none;
   position: relative;
+  background-color: #fafafa;
 }
 #artists-panel .row {
   overflow-x: auto;
   flex-wrap: nowrap;
+}
+#artists-title {
+  font-size: 20px;
+}
+.letter {
+  border: 1px solid black;
+  min-width: 0;
+  height: 100%;
+  flex-basis: auto;
+  border-radius: 5px;
+  -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
+  padding-right: 0;
+  padding-left: 0;
+  background-color: white;
+}
+.letter.active {
+  background-color: darkgrey;
+}
+.letter span {
+  white-space: nowrap;
 }
 #artists-panel .row.artists {
   min-height: 200px;
@@ -159,15 +193,23 @@ export default {
 #prev-button, #next-button {
   position: absolute;
   top: 50%;
-  font-size: 50px;
-  color: rgba(128,128,128,0.8);
+  font-size: 10px;
+  color: rgba(64,64,64,1.0);
+  background-color: rgba(255,255,255,0.8);
+  border-radius: 50%;
   margin: auto;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 #prev-button {
-  left: -0.5em;
+  left: 5px;
 }
 #next-button {
-  right: -0.5em;
+  right: 5px;
 }
 .artist {
   min-width: 200px;
@@ -189,30 +231,12 @@ export default {
   display: flex;
   flex-direction: row;
   min-height: 0;
+  margin-bottom: 10px;
 }
-#tracks, #track {
+#track-panel .row {
   flex: auto;
-  display: flex;
-  flex-direction: column;
-  overflow-y: hidden;
 }
-.letter {
-  border: 1px solid black;
-  min-width: 0;
+.panel {
   height: 100%;
-  flex-basis: auto;
-  border-radius: 5px;
-  -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  padding-right: 0;
-  padding-left: 0;
-  background-color: mintcream;
-}
-.letter.active {
-  background-color: darkseagreen;
-}
-.letter span {
-  white-space: nowrap;
 }
 </style>

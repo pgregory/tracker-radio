@@ -145,7 +145,7 @@ html {
 }
 html body {
   height: 100%;
-  background-color: black;
+  background-color: white;
 }
 #app {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
@@ -169,6 +169,7 @@ html body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  background-color: white;
 }
 #feedback-button {
   position: absolute;
@@ -181,9 +182,5 @@ html body {
   color: black;
   padding: 5px 5px 0 5px;
   border-radius: 5px 5px 0 0;
-}
-.panel-title {
-  color: white;
-  font-size: 28px;
 }
 </style>

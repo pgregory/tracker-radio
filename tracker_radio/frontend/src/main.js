@@ -9,13 +9,13 @@ import router from './router'
 import firebase from 'firebase/app'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faLink, faHeart, faChevronCircleLeft, faChevronCircleRight } from '@fortawesome/free-solid-svg-icons'
+import { faLink, faHeart, faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 library.add(faLink)
 library.add(faHeart)
-library.add(faChevronCircleLeft)
-library.add(faChevronCircleRight)
+library.add(faChevronLeft)
+library.add(faChevronRight)
 
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 

@@ -1,27 +1,22 @@
 <template>
-  <b-container id="track">
-    <b-row id="track-player-title" class="panel-title">
-      <b-col>
-        <span>Playing</span>
-      </b-col>
-    </b-row>
-    <b-container id="track-player">
-      <b-container class="track-player-inner">
-        <b-row id="transport-row">
-          <div class="transport-container">
-            <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
-            <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
-          </div>
-        </b-row>
-        <b-row id="monitors">
-          <div ref="monitor-container" class="monitor-container">
-            <div class="monitor-border"></div>
-            <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
-          </div>
-        </b-row>
-      </b-container>
-    </b-container>
-  </b-container>
+  <b-card id="playing"
+          class="panel"
+          no-body
+          header="Playing">
+    <b-card-body class="panel-body">
+      <b-row no-gutters id="transport-row">
+        <div>
+          <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
+          <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
+        </div>
+      </b-row>
+      <b-row no-gutters id="monitors">
+        <div ref="monitor-container" class="monitor-container">
+          <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
+        </div>
+      </b-row>
+    </b-card-body>
+  </b-card>
 </template>
 
 <script>
@@ -166,35 +161,7 @@ export default {
 </script>
 
 <style scoped>
-#track-player-title {
-  flex-shrink: 0;
-}
-#track-player  {
-  overflow-y: scroll;
-  border: 2px solid rgb(0,255,0);
-  border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  margin-bottom: 15px;
-  flex: auto;
-  background-color: #212529;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-}
-#track-player .track-player-inner  {
-  flex: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-}
-.track-title {
-  color: white;
-  font-size: 28px;
-}
 .monitor-container, .transport-container {
-  margin: 10px;
   position: relative;
   width: 100%;
   display: flex;
@@ -203,19 +170,12 @@ export default {
 }
 .monitor-container {
   background-color: black;
+  border: 3px solid lightgrey;
+  border-radius: 5px;
 }
 #monitors {
   flex: auto;
-}
-.monitor-border {
-  position: absolute;
-  border-radius: 5px;
-  border: 2px solid rgb(0,255,0);
-  -webkit-box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
-  -moz-box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
-  box-shadow: inset 0px 0px 10px 3px rgba(0,128,0,1);
-  width: 100%;
-  height: 100%;
+  margin-top: 10px;
 }
 .monitor-container canvas {
   border-radius: 5px;
@@ -224,5 +184,9 @@ export default {
 }
 #transport-row {
   flex-shrink: 0;
+}
+.panel-body {
+  display: flex;
+  flex-direction: column;
 }
 </style>

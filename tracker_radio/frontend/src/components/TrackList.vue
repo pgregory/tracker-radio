@@ -1,23 +1,20 @@
 <template>
-  <b-container id="tracks">
-    <b-row id="tracks-title" class="panel-title">
-      <b-col>
-        <span>Tracks</span>
-      </b-col>
-    </b-row>
-    <b-container id="track-list">
-      <b-table striped hover :items="tracks" :fields="track_fields"
-        dark
+  <b-card id="tracks"
+          class="panel"
+          no-body
+          header="Tracks">
+    <b-card-body class="tracks-list">
+      <b-table striped hover responsive :items="tracks" :fields="track_fields"
         v-on:row-clicked="trackSelected">
         <template slot="artist" slot-scope="data">
           {{ data.item.artist[0].name }}
         </template>
-        <template slot="rank" slot-scope="data">
+        <template slot="rating" slot-scope="data">
           <star-rating v-model="data.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
         </template>
       </b-table>
-    </b-container>
-  </b-container>
+    </b-card-body>
+  </b-card>
 </template>
 
 <script>
@@ -27,7 +24,7 @@ import StarRating from 'vue-star-rating'
 export default {
   data () {
     return {
-      track_fields: [ 'title', 'rank' ],
+      track_fields: [ 'title', 'rating' ],
       tracks: []
     }
   },
@@ -81,23 +78,12 @@ export default {
 </script>
 
 <style scoped>
-#tracks-title {
-  flex-shrink: 0;
+.tracks-list {
+  display: flex;
+  flex-direction: column;
+  overflow: scroll;
 }
-#track-list  {
-  overflow-y: scroll;
-  border: 2px solid rgb(0,255,0);
-  border-radius: 5px;
-  -webkit-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  -moz-box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  box-shadow: 0px 0px 20px 6px rgba(0,128,0,1);
-  margin-bottom: 15px;
-  flex: auto;
-  background-color: #212529;
-  padding: 0;
-}
-
-#track-list .table {
+.tracks-list .table {
   margin-bottom: 0;
 }
 </style>
