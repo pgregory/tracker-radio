@@ -19,9 +19,6 @@
       </b-row>
       <b-row ref="artists" class="artists">
         <b-card-group deck class="artist-list d-flex flex-nowrap mx-0">
-          <!--<b-col ref="artist" class="artist" v-for="(artist, index) in filteredArtists()" v-bind:key="artist.id" :data-index="index">
-            <artist v-bind:artist="artist" v-on:artist-selected="artistId = artist.id"/>
-            </b-col>-->
             <artist v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" :artist="artist" v-on:artist-selected="artistId = artist.id"/>
         </b-card-group>
       </b-row>

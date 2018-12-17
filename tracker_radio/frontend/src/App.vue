@@ -7,7 +7,8 @@
           <b-navbar-brand href="#">Tracker Radio</b-navbar-brand>
           <b-collapse is-nav id="nav_collapse">
             <b-navbar-nav>
-              <b-nav-item href="/artists">Artists</b-nav-item>
+              <b-nav-item to="/artists">Artists</b-nav-item>
+              <b-nav-item id="playlistsMenu" :disabled="user == null" to="/playlists">Playlists</b-nav-item>
             </b-navbar-nav>
             <b-navbar-nav class="ml-auto">
               <b-nav-form>
@@ -17,12 +18,13 @@
                   </template>
                   <b-dropdown-item v-on:click="logout">Logout</b-dropdown-item>
                 </b-nav-item-dropdown>
-                <b-nav-item v-else href="/login">Login</b-nav-item>
+                <b-nav-item v-else href="/login">Login/Sign Up</b-nav-item>
               </b-nav-form>
             </b-navbar-nav>
           </b-collapse>
         </b-navbar>
       </b-container>
+      <b-tooltip target="playlistsMenu" v-if="user == null">Login/Sign Up to use Playlists</b-tooltip>
     </div>
     <div id="page">
       <router-view :user="user"></router-view>

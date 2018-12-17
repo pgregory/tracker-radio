@@ -25,7 +25,7 @@ class TrackSchema(Schema):
     id = fields.Int(dump_only=True)
     title = fields.String()
     location = fields.String()
-    artist = fields.String()
+    artist = fields.Nested(ArtistSchema, only=['id', 'name'])
     coop = fields.List(fields.String())
     created_at = fields.DateTime()
     updated_at = fields.DateTime()

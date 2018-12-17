@@ -13,6 +13,10 @@
         <font-awesome-icon icon="heart" size="lg" class="favourite" v-bind:class="{ is_favourite: isFavourite }"
           v-on:click="setFavourite(track.id)"
           v-b-tooltip.hover title="Favourite"/>
+        <b-dropdown class="more-dropdown" no-caret variant="link">
+          <font-awesome-icon icon="ellipsis-h" size="lg" slot="button-content"></font-awesome-icon>
+          <b-dropdown-item v-on:click="onAddToPlaylist">Add to Playlist</b-dropdown-item>
+        </b-dropdown>
       </b-row>
       <b-row no-gutters class="wetracker">
         <a :href="getTrackLocation(track)" target="_blank">
@@ -26,6 +30,13 @@
           size="lg"
           v-b-tooltip.hover title="Shareable Link"/></router-link>
     </b-card-body>
+    <!-- Add To Playlist Modal -->
+    <b-modal ref="addTrackToPlaylistModal" id="add-to-playlist-modal" title="Add To Playlist"
+      ok-disabled cancel-disabled
+      allow-edit="false">
+      <PlaylistList v-bind:user="user" v-on:playlist-selected="onPlaylistSelected(track.id, $event)"/>
+      <div slot="modal-footer"></div>
+    </b-modal>
   </b-card>
 </template>
 
@@ -33,6 +44,7 @@
 import axios from 'axios'
 import StarRating from 'vue-star-rating'
 import firebase from 'firebase'
+import PlaylistList from './PlaylistList.vue'
 
 export default {
   data () {
@@ -137,10 +149,47 @@ export default {
             })
         })
       }
+    },
+    onPlaylistSelected (track, playlist) {
+      this.addTrackToPlaylist(track, playlist)
+      this.$refs.addTrackToPlaylistModal.hide()
+    },
+    onAddToPlaylist ($event) {
+      const user = firebase.auth().currentUser
+      if (user) {
+        this.$refs.addTrackToPlaylistModal.show()
+      } else {
+        alert('Login or Sign Up to use Playlists')
+      }
+    },
+    addTrackToPlaylist (track, playlist) {
+      const path = process.env.API_BASE_URL + `api/playlists/${playlist}/tracks/${track}`
+      const user = firebase.auth().currentUser
+      const self = this
+      if (user) {
+        user.getIdToken(true).then(function (idToken) {
+          self.$gtm.trackEvent({
+            event: 'playlist-add-track',
+            action: 'add-track',
+            category: 'Playlist',
+            label: 'Track Added to Playlist',
+            track_id: track,
+            playlist_id: playlist
+          })
+          axios.put(path, {},
+            { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              console.log(response)
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
     }
   },
   components: {
-    StarRating
+    StarRating,
+    PlaylistList
   },
   created () {
     this.getTrackData()

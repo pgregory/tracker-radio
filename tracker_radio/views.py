@@ -9,7 +9,8 @@ from random import *
 from firebase_admin import _utils, _token_gen
 
 from tracker_radio.models import (Track, TrackSchema, Artist, 
-        ArtistSchema, Rating, Account, Favourite, Feedback)
+        ArtistSchema, Rating, Account, Favourite, Feedback,
+        Playlist, PlaylistSchema)
 
 @login_manager.user_loader
 def load_user(account_id):
@@ -178,6 +179,7 @@ def post_tracks():
 @token_required
 def rate_track(user, track_id):
     data = request.json
+    # TODO: Need to confirm existence of track.
     rating = Rating.query.filter_by(track_id=track_id, user_id=user.account_id).first()
     if rating:
         rating.rating = data['rating']
@@ -207,6 +209,108 @@ def get_track_is_favourite(user, track_id):
     else:
         return jsonify({'favourite': False}), 200
 
+@app.route('/api/playlists', methods=['POST'])
+@token_required
+def post_playlist(user):
+    if not request.json:
+        abort(400)
+    schema = PlaylistSchema()
+    playlist = schema.load(request.json)
+    if not playlist.errors:
+        existing = Playlist.query.filter_by(owner_id=user.account_id, title=playlist.data.title)
+        # TODO: Need to work out a strategy for updating.
+        if existing.count() == 0:
+            playlist.data.owner_id = user.account_id
+            db.session.add(playlist.data)
+            db.session.commit()
+        return jsonify({'success': True}), 201
+    else:
+        print(playlist.errors)
+        return jsonify(playlist.errors), 400
+
+@app.route('/api/playlists/<int:playlist_id>/tracks/<int:track_id>', methods=['PUT'])
+@token_required
+def add_track_to_playlist(user, playlist_id, track_id):
+    data = request.json
+    playlist = Playlist.query.filter_by(id=playlist_id, owner_id=user.account_id).first()
+    if playlist:
+        track = Track.query.filter_by(id=track_id).first()
+        if track:
+            playlist.tracks.append(track)
+            db.session.add(playlist)
+            db.session.commit()
+            return jsonify({'success': True}), 201
+    return jsonify({'success': False}), 404
+
+@app.route('/api/playlists/<int:playlist_id>/tracks/<int:track_id>', methods=['DELETE'])
+@token_required
+def remove_track_from_playlist(user, playlist_id, track_id):
+    data = request.json
+    playlist = Playlist.query.filter_by(id=playlist_id, owner_id=user.account_id).first()
+    if playlist:
+        track = Track.query.filter_by(id=track_id).first()
+        if track in playlist.tracks:
+            playlist.tracks.remove(track)
+            db.session.add(playlist)
+            db.session.commit()
+            return jsonify({'success': True}), 200
+    return jsonify({'success': False}), 404
+
+@app.route('/api/playlists', methods=['GET'])
+def get_playlists():
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
+    if user:
+        schema = PlaylistSchema(many=True)
+        playlists = Playlist.query.filter_by(owner_id=user.account_id).all()
+        return schema.dumps(playlists)
+    else:
+        return jsonify({'success': False}), 400
+
+@app.route('/api/playlists/<int:playlist_id>/tracks', methods=['GET'])
+def get_playlist_tracks(playlist_id):
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
+    pl = Playlist.query.filter_by(id=playlist_id).first()
+    # TODO: Check ownership.
+    if pl:
+        schema = TrackSchema(many=True)
+        return schema.dumps(pl.tracks)
+    else:
+        return jsonify({'success': False}), 404
+
+@app.route('/api/playlists/<int:playlist_id>', methods=['PATCH'])
+@token_required
+def patch_playlist(user, playlist_id):
+    pl = Playlist.query.filter_by(owner_id=user.account_id, id=playlist_id).first()
+    if pl:
+        schema = PlaylistSchema()
+        playlist = schema.load(request.json, partial=True)
+        if not playlist.errors:
+            pl.title = playlist.data.title
+            db.session.add(pl)
+            db.session.commit()
+            return jsonify({'success': True}), 200
+        else:
+            return jsonify({'success': False}), 400
+    return jsonify({'success': False}), 404
+
+@app.route('/api/playlists/<int:playlist_id>', methods=['DELETE'])
+@token_required
+def delete_playlist(user, playlist_id):
+    pl = Playlist.query.filter_by(owner_id=user.account_id, id=playlist_id).first()
+    if pl:
+        db.session.delete(pl)
+        db.session.commit()
+        return jsonify({'success': True}), 200
+    return jsonify({'success': False}), 404
+
 @app.route('/api/feedback', methods=['POST'])
 def feedback():
     try:
@@ -215,7 +319,6 @@ def feedback():
         user = None
 
     data = request.json
-    print(data)
     feedback = Feedback(content=data['content'])
     if 'email' in data:
         feedback.email = data['email']

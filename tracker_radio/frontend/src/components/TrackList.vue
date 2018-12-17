@@ -5,7 +5,8 @@
           header="Tracks">
     <b-card-body class="tracks-list">
       <b-table striped hover responsive :items="tracks" :fields="track_fields"
-        v-on:row-clicked="trackSelected">
+        v-on:row-clicked="trackSelected"
+        small>
         <template slot="artist" slot-scope="data">
           {{ data.item.artist[0].name }}
         </template>
