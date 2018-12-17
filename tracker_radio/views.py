@@ -357,8 +357,8 @@ def signin():
             user = Account(firebase_user_id=verified_claims['uid'], 
                     email = verified_claims['email'],
                     email_verified = verified_claims['email_verified'],
-                    name = verified_claims['name'],
-                    photo_url = verified_claims['picture']
+                    name = verified_claims['name'] if 'name' in verified_claims else '',
+                    photo_url = verified_claims['picture'] if 'picture' in verified_claims else ''
                     )
             db.session.add(user)
             db.session.commit()
