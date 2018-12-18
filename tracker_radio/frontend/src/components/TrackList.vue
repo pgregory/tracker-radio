@@ -83,6 +83,7 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: scroll;
+  height: 0;
 }
 .tracks-list .table {
   margin-bottom: 0;
