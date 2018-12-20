@@ -4,20 +4,29 @@
           no-body
           header="Playlists">
     <b-card-body class="playlists-list">
-      <b-table striped hover responsive :items="playlists" :fields="playlist_fields"
-        v-on:row-clicked="playlistSelected"
-        thead-class="hidden_header"
-        small>
-        <template slot="edit" slot-scope="data">
-          <b-button v-if="allowEdit" v-on:click="onEditPlaylist(data.item)" size="sm">
-            <font-awesome-icon icon="edit"/>
-          </b-button>
-          <b-button v-if="allowEdit" v-on:click="onDeletePlaylist(data.item)" size="sm"
-            variant="danger">
-            <font-awesome-icon icon="trash"/>
-          </b-button>
-        </template>
-      </b-table>
+      <div>
+        <h4>My Playlists</h4>
+        <b-table striped hover responsive :items="playlists" :fields="playlist_fields"
+          v-on:row-clicked="playlistSelected"
+          thead-class="hidden_header"
+          small>
+          <template slot="edit" slot-scope="data">
+            <b-button v-if="allowEdit" v-on:click="onEditPlaylist(data.item)" size="sm">
+              <font-awesome-icon icon="edit"/>
+            </b-button>
+            <b-button v-if="allowEdit" v-on:click="onDeletePlaylist(data.item)" size="sm"
+              variant="danger">
+              <font-awesome-icon icon="trash"/>
+            </b-button>
+          </template>
+        </b-table>
+        <h4>Auto Playlists</h4>
+        <b-table striped hover responsive :items="autoPlaylists" :fields="auto_playlist_fields"
+          v-on:row-clicked="autoPlaylistSelected"
+          thead-class="hidden_header"
+          small>
+        </b-table>
+      </div>
     </b-card-body>
     <!-- Edit Playlist Modal -->
     <b-modal ref="editPlaylistModal"
@@ -75,7 +84,12 @@ export default {
       playlists: [],
       selectedPlaylist: null,
       newPlaylistTitle: '',
-      editPlaylistModalShow: false
+      editPlaylistModalShow: false,
+      autoPlaylists: [ {
+        'title': 'Favourites',
+        'id': 'favourites'
+      } ],
+      auto_playlist_fields: [ 'title' ]
     }
   },
   props: {
@@ -103,7 +117,10 @@ export default {
       this.getPlaylistsFromBackend()
     },
     playlistSelected (item, index) {
-      this.$emit('playlist-selected', item.id)
+      this.$emit('playlist-selected', {id: item.id, auto: false})
+    },
+    autoPlaylistSelected (item, index) {
+      this.$emit('playlist-selected', {id: item.id, auto: true})
     },
     onEditPlaylist (playlist) {
       this.selectedPlaylist = playlist

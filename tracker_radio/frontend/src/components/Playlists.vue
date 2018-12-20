@@ -7,12 +7,19 @@
         <b-col sm="8" class="lists">
           <b-row class="playlists">
             <b-col sm="12">
-              <PlaylistList allow-edit="true" v-bind:user="user" v-on:playlist-selected="playlistId = $event"/>
+              <PlaylistList
+                   allow-edit="true"
+                   v-bind:user="user"
+                   v-on:playlist-selected="selectPlaylist($event)"/>
             </b-col>
           </b-row>
           <b-row class="tracks">
             <b-col sm="12">
-              <PlaylistTrackList v-bind:playlistId="playlistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
+              <PlaylistTrackList
+                   v-bind:playlist="playlist"
+                   v-bind:editablePlaylist="editablePlaylist"
+                   v-bind:user="user"
+                   v-on:track-selected="trackId = $event"/>
             </b-col>
           </b-row>
         </b-col>
@@ -33,6 +40,8 @@
 import PlaylistList from './PlaylistList.vue'
 import PlaylistTrackList from './PlaylistTrackList.vue'
 import TrackPlayer from './TrackPlayer.vue'
+import axios from 'axios'
+import firebase from 'firebase'
 
 export default {
   name: 'Playlists',
@@ -42,10 +51,40 @@ export default {
   data () {
     return {
       playlistId: null,
-      trackId: null
+      playlist: [],
+      trackId: null,
+      editablePlaylist: false
     }
   },
   methods: {
+    getPlaylistTracksFromBackend () {
+      if (this.playlistId) {
+        const user = firebase.auth().currentUser
+        if (user) {
+          const self = this
+          user.getIdToken(true).then(function (idToken) {
+            const path = process.env.API_BASE_URL + `api/playlists/${self.playlistId}/tracks`
+            axios.get(path, {
+              headers: { 'Authorization': 'bearer ' + idToken } })
+              .then(response => {
+                self.playlist = response.data
+              })
+              .catch(error => {
+                console.log(error)
+              })
+          })
+        }
+      }
+    },
+    getPlaylistTracks () {
+      this.tracks = []
+      this.getPlaylistTracksFromBackend()
+    },
+    selectPlaylist (data) {
+      this.playlistId = data.id
+      this.editablePlaylist = !data.auto
+      this.getPlaylistTracks()
+    }
   },
   components: {
     PlaylistList,

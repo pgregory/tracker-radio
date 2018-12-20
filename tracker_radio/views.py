@@ -285,6 +285,16 @@ def get_playlist_tracks(playlist_id):
     else:
         return jsonify({'success': False}), 404
 
+@app.route('/api/playlists/<string:playlist_name>/tracks', methods=['GET'])
+@token_required
+def get_auto_playlist_tracks(user, playlist_name):
+    if playlist_name == 'favourites':
+        schema = TrackSchema(many=True)
+        tracks = Track.query.filter(Track.favourited.any(Account.account_id == user.account_id))
+        return schema.dumps(tracks)
+    else:
+        return jsonify({'success': False}), 404
+
 @app.route('/api/playlists/<int:playlist_id>', methods=['PATCH'])
 @token_required
 def patch_playlist(user, playlist_id):
