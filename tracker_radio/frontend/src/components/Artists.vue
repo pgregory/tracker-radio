@@ -1,53 +1,50 @@
 // Artists.vue
 
 <template>
-  <div id="content">
-    <b-container id="artists-panel">
-      <b-row id="artists-title" class="panel-title">
-        <b-col>
-          <span>Artists</span>
-        </b-col>
-      </b-row>
-      <b-row class="letters">
-        <b-col class="letter" v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
-          <span>{{ letter }}</span>
-        </b-col>
-      </b-row>
-      <b-row class="search">
-        <b-form-input v-model="search_string" type="text" placeholder="Search"></b-form-input>
-        <b-button v-on:click="search_string = ''">X</b-button>
-      </b-row>
-      <b-row ref="artists" class="artists">
-        <b-card-group deck class="artist-list d-flex flex-nowrap mx-0">
-            <artist v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" :artist="artist" v-on:artist-selected="artistId = artist.id"/>
-        </b-card-group>
-      </b-row>
-      <div id="prev-button" v-on:click="scrollRight"><font-awesome-icon icon="chevron-left" size="1x"/></div>
-      <div id="next-button" v-on:click="scrollLeft"><font-awesome-icon icon="chevron-right" size="1x"/></div>
-    </b-container>
-    <b-container id="track-panel">
-      <b-row>
-        <b-col sm="4">
-          <TrackList v-bind:artistId="artistId" v-bind:user="user" v-on:track-selected="trackId = $event"/>
-        </b-col>
-        <b-col sm="4">
-          <TrackData v-bind:trackId="trackId" v-bind:user="user"/>
-        </b-col>
-        <b-col sm="4">
-          <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
-        </b-col>
-      </b-row>
-    </b-container>
-  </div>
+  <v-container id="content">
+    <div id="artists-panel">
+      <v-layout row justify-center>
+        <h2>Artists</h2>
+      </v-layout>
+      <v-layout row wrap justify-center>
+        <v-flex xs6>
+          <v-text-field
+            v-model="search_string"
+            hint="Search within current set"
+            placeholder="Search"
+            clearable>
+          </v-text-field>
+        </v-flex>
+        <v-flex xs6>
+          <v-chip dark small v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
+              <span>{{ letter }}</span>
+          </v-chip>
+        </v-flex>
+      </v-layout>
+      <v-container grid-list-lg>
+        <v-layout row wrap ref="artists">
+          <v-flex v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" >
+            <v-card
+              hover
+              width="150"
+              height="100%"
+              v-on:click="onArtistSelected(artist.id)">
+              <v-img :src="getRandomAvatar()">
+              </v-img>
+              <v-card-title>
+                {{ artist.name }}
+              </v-card-title>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </div>
+  </v-container>
 </template>
 
 <script>
 import axios from 'axios'
-import VueScrollTo from 'vue-scrollto'
-import Artist from './Artist.vue'
-import TrackList from './TrackList.vue'
-import TrackData from './TrackData.vue'
-import TrackPlayer from './TrackPlayer.vue'
+// import VueScrollTo from 'vue-scrollto'
 
 export default {
   name: 'Artists',
@@ -94,49 +91,16 @@ export default {
       this.current_letter = letter
       this.getArtists()
     },
-    outerWidth (el) {
-      var width = el.offsetWidth
-      var style = getComputedStyle(el)
-
-      width += parseInt(style.marginLeft) + parseInt(style.marginRight)
-      return width
+    onArtistSelected (artistId) {
+      this.$router.push({ path: `/artists/${artistId}` })
     },
-    scrollLeft () {
-      var itemWidth = this.outerWidth(this.$refs['artist'][0].$el)
-      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / itemWidth)
-      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / itemWidth)
-      var target = Math.min(currentFirst + scrollCount, this.$refs['artist'].length)
-      var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
-      var options = {
-        container: this.$refs['artists'],
-        easing: 'ease-in-out',
-        force: true,
-        x: true,
-        y: false
-      }
-      VueScrollTo.scrollTo(targetElement, 500, options)
-    },
-    scrollRight () {
-      var itemWidth = this.outerWidth(this.$refs['artist'][0].$el)
-      var scrollCount = Math.floor(this.$refs['artists'].offsetWidth / itemWidth)
-      var currentFirst = Math.floor(this.$refs['artists'].scrollLeft / itemWidth)
-      var target = Math.max(currentFirst - scrollCount, 0)
-      var targetElement = document.querySelector(`.artist[data-index="${target}"]`)
-      var options = {
-        container: this.$refs['artists'],
-        easing: 'ease-in-out',
-        force: true,
-        x: true,
-        y: false
-      }
-      VueScrollTo.scrollTo(targetElement, 500, options)
+    getRandomAvatar () {
+      var index = Math.ceil(Math.random() * 6)
+      var strIndex = ('000' + index).slice(-3)
+      return `/static/cover-${strIndex}.png`
     }
   },
   components: {
-    Artist,
-    TrackList,
-    TrackData,
-    TrackPlayer
   },
   created () {
     this.getArtists()
@@ -156,7 +120,7 @@ export default {
   position: relative;
   background-color: #fafafa;
 }
-#artists-panel .row {
+#artists-panel .row.artists {
   overflow-x: auto;
   flex-wrap: nowrap;
 }

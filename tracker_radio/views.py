@@ -66,7 +66,7 @@ def token_required(f):
             user = get_user_from_token(request)
             return f(user, *args, **kwargs)
         except AuthenticationError as e:
-            if e.code == CODE_INVALID:
+            if e.code == AuthenticationError.CODE_INVALID:
                 return jsonify(invalid_msg), 401
 
     return _verify
@@ -128,7 +128,7 @@ def post_artists():
 @app.route('/api/artists/<int:artist_id>', methods=['GET'])
 def get_artist(artist_id):
     schema = ArtistSchema()
-    artist = Artist.get_by_id(artist_id)
+    artist = Artist.query.filter_by(id=artist_id).first()
     if not artist:
         abort(404)
     return schema.dumps(artist)
@@ -269,6 +269,16 @@ def get_playlists():
         return schema.dumps(playlists)
     else:
         return jsonify({'success': False}), 400
+
+@app.route('/api/playlists/<int:playlist_id>', methods=['GET'])
+@token_required
+def get_playlist(user, playlist_id):
+    pl = Playlist.query.filter_by(owner_id=user.account_id, id=playlist_id).first()
+    if pl:
+        schema = PlaylistSchema()
+        return schema.dumps(pl)
+    else:
+        return jsonify({'success': False, 'msg': 'Not found'}), 404
 
 @app.route('/api/playlists/<int:playlist_id>/tracks', methods=['GET'])
 def get_playlist_tracks(playlist_id):

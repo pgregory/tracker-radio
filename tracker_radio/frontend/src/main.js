@@ -3,6 +3,8 @@
 import Vue from 'vue'
 import VueGtm from 'vue-gtm'
 import BootstrapVue from 'bootstrap-vue'
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
 import '../node_modules/firebaseui/dist/firebaseui.css'
 import App from './App'
 import router from './router'
@@ -27,6 +29,9 @@ Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 Vue.config.productionTip = false
 
+Vue.use(Vuetify, {
+  iconfont: 'md'
+})
 Vue.use(BootstrapVue)
 Vue.use(VueGtm, {
   id: 'GTM-5QXM7D3',

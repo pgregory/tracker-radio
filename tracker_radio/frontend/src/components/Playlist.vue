@@ -1,22 +1,24 @@
+// Playlist.vue
+
 <template>
   <div id="content">
-    <v-container v-if="artist" grid-list-xl>
+    <v-container v-if="playlist" grid-list-xl>
       <v-layout row>
         <v-flex sm2>
           <v-img :src="getRandomAvatar()"></v-img>
         </v-flex>
         <v-flex sm6>
           <v-layout column fill-height align-start justify-center>
-            <h2>{{ artist.name }}</h2>
+            <h2>{{ playlist.title }}</h2>
             <h4>{{ numtracks }} Tracks</h4>
           </v-layout>
         </v-flex>
       </v-layout>
       <v-layout row>
-        <TrackList v-bind:artistId="artistId" v-bind:user="user"
+        <PlaylistTrackList v-bind:playlistId="playlistId" v-bind:user="user"
             v-on:num-tracks="numtracks = $event"
             v-on:track-selected="trackSelected($event)"
-            v-on:play-track="playTrack($event)"></TrackList>
+            v-on:play-track="playTrack($event)"></PlaylistTrackList>
       </v-layout>
     </v-container>
   </div>
@@ -24,33 +26,44 @@
 
 <script>
 import axios from 'axios'
-import TrackList from './TrackList.vue'
+import PlaylistTrackList from './PlaylistTrackList.vue'
 
 export default {
   data () {
     return {
-      artistId: null,
-      artist: null,
+      playlistId: null,
+      playlist: null,
       numtracks: 0
     }
   },
   props: {
     user: Object
   },
+  watch: {
+    user (val, oldval) {
+      this.getPlaylistData()
+    }
+  },
   components: {
-    TrackList
+    PlaylistTrackList
   },
   methods: {
-    getArtistData () {
-      if (this.artistId) {
-        const path = process.env.API_BASE_URL + `api/artists/${this.artistId}`
-        axios.get(path)
-          .then(response => {
-            this.artist = response.data
+    getPlaylistData () {
+      if (this.playlistId) {
+        const path = process.env.API_BASE_URL + `api/playlists/${this.playlistId}`
+        if (this.user) {
+          var self = this
+          this.user.getIdToken(true).then(function (idToken) {
+            axios.get(path,
+              { headers: { 'Authorization': 'bearer ' + idToken } })
+              .then(response => {
+                self.playlist = response.data
+                console.log(this.playlist)
+              }).catch(error => {
+                console.log(error)
+              })
           })
-          .catch(error => {
-            console.log(error)
-          })
+        }
       }
     },
     getRandomAvatar () {
@@ -66,36 +79,11 @@ export default {
     }
   },
   created () {
-    this.artistId = parseInt(this.$route.params.id)
-    this.getArtistData()
+    this.playlistId = parseInt(this.$route.params.id)
+    this.getPlaylistData()
   }
 }
 </script>
 
 <style scoped>
-.artist {
-  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.16), 0 0 0 1px rgba(0,0,0,0.08);
-}
-.artist.empty {
-  background-color: lightslategrey;
-}
-.artist-name {
-  color: white;
-  flex-shrink: 0;
-}
-.artist-image {
-  flex: auto;
-  display: flex;
-  min-height: 0;
-  width: 100%;
-}
-.artist-image-container {
-  padding: 5px;
-  flex: auto;
-  width: 100%;
-}
-.artist-image-container img {
-  height: 132px;
-  border-radius: 25%;
-}
 </style>

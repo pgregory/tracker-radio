@@ -1,22 +1,17 @@
 <template>
-  <b-card id="playing"
-          class="panel"
-          no-body
-          header="Playing">
-    <b-card-body class="panel-body">
-      <b-row no-gutters id="transport-row">
-        <div>
-          <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
-          <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
-        </div>
-      </b-row>
-      <b-row no-gutters id="monitors">
-        <div ref="monitor-container" class="monitor-container">
-          <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
-        </div>
-      </b-row>
-    </b-card-body>
-  </b-card>
+  <v-layout row fill-height>
+    <v-flex sm4>
+      <h3 v-if="track">{{ track.title }}</h3>
+    </v-flex>
+    <v-flex sm4>
+      <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
+      <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
+    </v-flex>
+    <v-flex sm2></v-flex>
+    <v-flex sm2 ref="monitor-container">
+      <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
+    </v-flex>
+  </v-layout>
 </template>
 
 <script>
@@ -39,11 +34,13 @@ export default {
   },
   watch: {
     trackId (val, oldval) {
-      this.getTrackData()
+      this.getTrackData().then(() => {
+        this.loadSong(this.track)
+      })
     }
   },
   methods: {
-    getTrackData () {
+    async getTrackData () {
       if (this.trackId) {
         const path = process.env.API_BASE_URL + `api/tracks/${this.trackId}`
         axios.get(path)

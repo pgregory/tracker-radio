@@ -1,34 +1,27 @@
 <template>
-  <div id="app">
-    <div>
-      <b-container>
-        <b-navbar toggleable="md" type="dark" variant="dark">
-          <b-navbar-toggle target="nav_collapse"></b-navbar-toggle>
-          <b-navbar-brand href="#">Tracker Radio</b-navbar-brand>
-          <b-collapse is-nav id="nav_collapse">
-            <b-navbar-nav>
-              <b-nav-item to="/artists">Artists</b-nav-item>
-              <b-nav-item id="playlistsMenu" :disabled="user == null" to="/playlists">Playlists</b-nav-item>
-            </b-navbar-nav>
-            <b-navbar-nav class="ml-auto">
-              <b-nav-form>
-                <b-nav-item-dropdown v-if="user != null" no-caret>
-                  <template slot="button-content">
-                    <b-img class="avatar-image" :src="user.photoURL"></b-img>
-                  </template>
-                  <b-dropdown-item v-on:click="logout">Logout</b-dropdown-item>
-                </b-nav-item-dropdown>
-                <b-nav-item v-else href="/login">Login/Sign Up</b-nav-item>
-              </b-nav-form>
-            </b-navbar-nav>
-          </b-collapse>
-        </b-navbar>
-      </b-container>
+  <v-app id="app">
+    <v-toolbar dark fixed app color="primary">
+      <v-toolbar-side-icon></v-toolbar-side-icon>
+      <v-toolbar-title class="white--text">Tracker Radio</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-toolbar-items>
+        <v-btn flat to="/artists">Artists</v-btn>
+        <v-btn flat to="/playlists">Playlists</v-btn>
+      </v-toolbar-items>
+      <v-avatar color="white" size="40">
+        <b-img v-if="user" :src="user.photoURL"></b-img>
+      </v-avatar>
       <b-tooltip target="playlistsMenu" v-if="user == null">Login/Sign Up to use Playlists</b-tooltip>
-    </div>
-    <div id="page">
-      <router-view :user="user"></router-view>
-    </div>
+    </v-toolbar>
+    <v-content id="page">
+      <router-view :user="user"
+        v-on:track-selected="selectedTrackId = $event"
+        v-on:play-track="playingTrackId = $event">
+      </router-view>
+    </v-content>
+    <v-footer app fixed height="90">
+      <TrackPlayer v-bind:user="user" v-bind:trackId="playingTrackId"></TrackPlayer>
+    </v-footer>
     <div id="feedback-button" v-b-modal.modal1>
       Feedback
     </div>
@@ -59,7 +52,7 @@
       </b-form>
       <div slot="modal-footer"></div>
     </b-modal>
-  </div>
+  </v-app>
 </template>
 
 <script>
@@ -68,14 +61,21 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import firebase from 'firebase'
 import axios from 'axios'
 
+import TrackPlayer from './components/TrackPlayer.vue'
+
 export default {
   name: 'App',
   data () {
     return {
       user: null,
       feedbackEmail: '',
-      feedbackContent: ''
+      feedbackContent: '',
+      selectedTrackId: null,
+      playingTrackId: null
     }
+  },
+  components: {
+    TrackPlayer
   },
   mounted: function () {
     var self = this

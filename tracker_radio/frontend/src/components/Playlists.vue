@@ -1,39 +1,30 @@
 // Playlists.vue
 
 <template>
-  <div id="content">
-    <b-container v-if="user != null" id="playlists-panel">
-      <b-row>
-        <b-col sm="8" class="lists">
-          <b-row class="playlists">
-            <b-col sm="12">
-              <PlaylistList
-                   allow-edit="true"
-                   v-bind:user="user"
-                   v-on:playlist-selected="selectPlaylist($event)"/>
-            </b-col>
-          </b-row>
-          <b-row class="tracks">
-            <b-col sm="12">
-              <PlaylistTrackList
-                   v-bind:playlist="playlist"
-                   v-bind:editablePlaylist="editablePlaylist"
-                   v-bind:user="user"
-                   v-on:track-selected="trackId = $event"/>
-            </b-col>
-          </b-row>
-        </b-col>
-        <b-col sm="4">
-          <TrackPlayer v-bind:trackId="trackId" v-bind:user="user"/>
-        </b-col>
-      </b-row>
-    </b-container>
-    <b-container v-else>
-      <b-jumbotron header="Playlists">
-        <p>To use playlists, login or sign up using the link at the right of the navigation bar above.</p>
-      </b-jumbotron>
-    </b-container>
-  </div>
+  <v-container id="content">
+    <div id="artists-panel">
+      <v-layout row justify-center>
+        <h2>Playlists</h2>
+      </v-layout>
+      <v-container grid-list-lg>
+        <v-layout row wrap ref="playlists">
+          <v-flex v-for="(playlist, index) in playlists" ref="playlist" v-bind:key="playlist.id" :data-index="index" >
+            <v-card
+              hover
+              width="150"
+              height="100%"
+              v-on:click="onPlaylistSelected(playlist)">
+              <v-img :src="getRandomAvatar()">
+              </v-img>
+              <v-card-title>
+                {{ playlist.title }}
+              </v-card-title>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </div>
+  </v-container>
 </template>
 
 <script>
@@ -53,10 +44,32 @@ export default {
       playlistId: null,
       playlist: [],
       trackId: null,
-      editablePlaylist: false
+      editablePlaylist: false,
+      playlists: []
+    }
+  },
+  watch: {
+    user (val, oldval) {
+      this.getPlaylistsFromBackend()
     }
   },
   methods: {
+    getPlaylistsFromBackend () {
+      const path = process.env.API_BASE_URL + `api/playlists`
+      const self = this
+      if (this.user) {
+        this.user.getIdToken(true).then(function (idToken) {
+          axios.get(path,
+            { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.playlists = response.data
+              console.log(self.playlists)
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
+    },
     getPlaylistTracksFromBackend () {
       if (this.playlistId) {
         const user = firebase.auth().currentUser
@@ -80,16 +93,24 @@ export default {
       this.tracks = []
       this.getPlaylistTracksFromBackend()
     },
-    selectPlaylist (data) {
-      this.playlistId = data.id
-      this.editablePlaylist = !data.auto
-      this.getPlaylistTracks()
+    onPlaylistSelected (playlist) {
+      this.playlistId = playlist.id
+      this.editablePlaylist = !playlist.auto
+      this.$router.push({ path: `/playlists/${this.playlistId}` })
+    },
+    getRandomAvatar () {
+      var index = Math.ceil(Math.random() * 6)
+      var strIndex = ('000' + index).slice(-3)
+      return `/static/cover-${strIndex}.png`
     }
   },
   components: {
     PlaylistList,
     PlaylistTrackList,
     TrackPlayer
+  },
+  created () {
+    this.getPlaylistsFromBackend()
   }
 }
 </script>

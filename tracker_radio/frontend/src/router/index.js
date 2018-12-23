@@ -5,10 +5,12 @@ const routerOptions = [
   { path: '/', component: 'Home' },
   { path: '/about', component: 'About' },
   { path: '/artists', component: 'Artists' },
+  { path: '/artists/:id', component: 'Artist' },
   { path: '/login', component: 'Login' },
   { path: '/sign-up', component: 'SignUp' },
   { path: '/track/:id', component: 'Track' },
-  { path: '/playlists', component: 'Playlists' }
+  { path: '/playlists', component: 'Playlists' },
+  { path: '/playlists/:id', component: 'Playlist' }
 ]
 
 const routes = routerOptions.map(route => {
