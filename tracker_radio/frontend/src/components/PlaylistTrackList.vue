@@ -12,7 +12,9 @@
               <td class="track-index">{{ props.index }}</td>
               <td class="track-title">{{ props.item.title }}</td>
               <td class="track-artist">{{ props.item.artist.name }}</td>
-              <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
+              <td class="track-play">
+                <v-icon large v-on:click.stop="onPlayTrack(props.item)">play_arrow</v-icon>
+              </td>
               <td class="track-rating">
                 <star-rating v-model="props.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
               </td>
@@ -88,6 +90,7 @@ export default {
         axios.get(path)
           .then(response => {
             this.tracks = response.data
+            this.$emit('num-tracks', this.tracks.length)
           })
           .catch(error => {
             console.log(error)
@@ -95,7 +98,7 @@ export default {
       }
     },
     trackSelected (item, index) {
-      this.$emit('track-selected', item.id)
+      this.$router.push({ name: 'track', params: { id: item.id } })
     },
     onRemoveTrack (trackId) {
       if (this.playlistId) {

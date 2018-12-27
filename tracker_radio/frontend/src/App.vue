@@ -22,36 +22,54 @@
     <v-footer app fixed height="128" class="raised-footer">
       <TrackPlayer v-bind:user="user" v-bind:trackId="playingTrackId"></TrackPlayer>
     </v-footer>
-    <div id="feedback-button" v-b-modal.modal1>
+    <div id="feedback-button" v-on:click="feedbackModalShow = true">
       Feedback
     </div>
     <!-- Feedback Modal -->
-    <b-modal ref="feedbackModal" id="modal1" title="Your Feedback is Welcome"
-      ok-disabled cancel-disabled>
-      <b-form @submit="onSubmitFeedback" @reset="onResetFeedback">
-        <b-form-group id="feedbackEmailGroup" label="Email address"
-                                              label-for="feedbackEmailInput"
-                                              v-if="user == null">
-          <b-form-input id="feedbackEmailInput"
-            v-model="feedbackEmail"
-            type="email"
-            placeholder="Enter email"
-            required>
-          </b-form-input>
-        </b-form-group>
-        <b-form-group id="feedbackContentGroup" label="Enter your comments"
-                                                label-for="feedbackContentTextArea">
-          <b-form-textarea id="feedbackContentTextArea"
-            v-model="feedbackContent"
-            placeholder="Enter your comments"
-            :rows="5">
-          </b-form-textarea>
-        </b-form-group>
-        <b-button type="submit" variant="primary">Submit</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
-      </b-form>
-      <div slot="modal-footer"></div>
-    </b-modal>
+    <v-dialog
+      ref="feedbackModal"
+      id="modal1"
+      title="Your Feedback is Welcome"
+      max-width="600px"
+      v-model="feedbackModalShow">
+      <v-card>
+        <v-card-title>
+          <span class="headline">Your Feedback is Welcome</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex md6>
+                <v-text-field
+                  id="feedbackEmailInput"
+                  v-model="feedbackEmail"
+                  :rules="[rules.required, rules.email]"
+                  label="Email">
+                </v-text-field>
+              </v-flex>
+              <v-flex md12>
+                <v-textarea
+                  v-model="feedbackContent"
+                  id="feedbackContentTextArea"
+                  label="Enter your comments">
+                </v-textarea>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1"
+                 flat v-on:click="feedbackModalShow = false">
+            Close
+          </v-btn>
+          <v-btn color="blue darken-1"
+                 flat v-on:click="onSubmitFeedback">
+            Submit
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-app>
 </template>
 
@@ -71,7 +89,15 @@ export default {
       feedbackEmail: '',
       feedbackContent: '',
       selectedTrackId: null,
-      playingTrackId: null
+      playingTrackId: null,
+      feedbackModalShow: false,
+      rules: {
+        required: value => !!value || 'Required.',
+        email: value => {
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+          return pattern.test(value) || 'Invalid e-mail.'
+        }
+      }
     }
   },
   components: {
@@ -119,7 +145,7 @@ export default {
             content: self.feedbackContent
           }, { headers: { 'Authorization': 'bearer ' + idToken } }).then(function (response) {
             console.log(response)
-            self.$refs.feedbackModal.hide()
+            self.feedbackModalShow = false
           })
         })
       } else {
@@ -128,7 +154,7 @@ export default {
           content: this.feedbackContent
         }).then(function (response) {
           console.log(response)
-          self.$refs.feedbackModal.hide()
+          self.feedbackModalShow = false
         })
       }
     },

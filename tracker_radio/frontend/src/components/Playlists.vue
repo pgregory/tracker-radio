@@ -2,13 +2,18 @@
 
 <template>
   <v-container id="content">
-    <div id="artists-panel">
+    <v-container id="my-playlists-panel">
       <v-layout row justify-center>
-        <h2>Playlists</h2>
+        <h2>My Playlists</h2>
       </v-layout>
       <v-container grid-list-lg>
-        <v-layout row wrap ref="playlists">
-          <v-flex v-for="(playlist, index) in playlists" ref="playlist" v-bind:key="playlist.id" :data-index="index" >
+        <v-layout row wrap align-start justify-start fill-height ref="playlists">
+          <v-flex
+            shrink
+            v-for="(playlist, index) in playlists"
+            ref="playlist"
+            v-bind:key="playlist.id"
+            :data-index="index" >
             <v-card
               hover
               width="150"
@@ -28,8 +33,12 @@
                   </v-btn>
                   <v-list>
                     <v-list-tile
-                         v-on:click="editPlaylist(playlist)">
+                         v-on:click="onEditPlaylist(playlist)">
                       Edit
+                    </v-list-tile>
+                    <v-list-tile
+                         v-on:click="onDeletePlaylist(playlist)">
+                      Delete
                     </v-list-tile>
                   </v-list>
                 </v-menu>
@@ -37,8 +46,49 @@
             </v-card>
           </v-flex>
         </v-layout>
+        <v-btn
+          fab
+          v-on:click="addPlaylist">
+          <v-icon>add</v-icon>
+        </v-btn>
       </v-container>
-    </div>
+    </v-container>
+    <v-container id="auto-playlists-panel">
+      <v-layout row justify-center>
+        <h2>Auto Playlists</h2>
+      </v-layout>
+      <v-container grid-list-lg>
+        <v-layout row wrap align-start justify-start fill-height ref="auto-playlists">
+          <v-flex
+            shrink
+            v-for="(playlist, index) in autoPlaylists"
+            ref="playlist"
+            v-bind:key="playlist.id"
+            :data-index="index" >
+            <v-card
+              hover
+              width="150"
+              height="100%">
+              <v-img :src="getRandomAvatar(playlist.ref)"
+                v-on:click="onAutoPlaylistSelected(playlist)">
+              </v-img>
+              <v-card-title>
+                {{ playlist.title }}
+              </v-card-title>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-menu bottom left>
+                  <v-btn slot="activator"
+                         icon>
+                    <v-icon>more_vert</v-icon>
+                  </v-btn>
+                </v-menu>
+              </v-card-actions>
+            </v-card>
+          </v-flex>
+        </v-layout>
+      </v-container>
+    </v-container>
     <!-- Edit Playlist Modal -->
     <v-dialog ref="editPlaylistModal"
       id="edit-playlist-modal"
@@ -76,15 +126,52 @@
         </v-card-actions>
       </v-card>
     </v-dialog>
+    <!-- New Playlist Modal -->
+    <v-dialog ref="newPlaylistModal"
+      id="new-playlist-modal"
+      title="New Playlist"
+      v-model="newPlaylistModalShow"
+      max-width="600px"
+      v-on:ok="onNewPlaylistSubmit">
+      <v-card>
+        <v-card-title>
+          <span class="headline">New Playlist</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm6 md4>
+                <v-text-field
+                  label="Title*" required
+                  v-model="newPlaylistTitle">
+                </v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1"
+                 flat v-on:click="onNewPlaylistCancel">
+            Close
+          </v-btn>
+          <v-btn color="blue darken-1"
+                 flat
+                 v-on:click="onNewPlaylistSubmit">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
 <script>
 import PlaylistList from './PlaylistList.vue'
 import PlaylistTrackList from './PlaylistTrackList.vue'
+import AutoPlaylistTrackList from './AutoPlaylistTrackList.vue'
 import TrackPlayer from './TrackPlayer.vue'
 import axios from 'axios'
-import firebase from 'firebase'
 import mixins from '../mixins.js'
 
 export default {
@@ -100,7 +187,10 @@ export default {
       editablePlaylist: false,
       playlists: [],
       editPlaylistModalShow: false,
-      selectedPlaylist: null
+      selectedPlaylist: null,
+      newPlaylistTitle: '',
+      newPlaylistModalShow: false,
+      autoPlaylists: []
     }
   },
   watch: {
@@ -123,36 +213,23 @@ export default {
             })
         })
       }
-    },
-    getPlaylistTracksFromBackend () {
-      if (this.playlistId) {
-        const user = firebase.auth().currentUser
-        if (user) {
-          const self = this
-          user.getIdToken(true).then(function (idToken) {
-            const path = process.env.API_BASE_URL + `api/playlists/${self.playlistId}/tracks`
-            axios.get(path, {
-              headers: { 'Authorization': 'bearer ' + idToken } })
-              .then(response => {
-                self.playlist = response.data
-              })
-              .catch(error => {
-                console.log(error)
-              })
-          })
-        }
-      }
-    },
-    getPlaylistTracks () {
-      this.tracks = []
-      this.getPlaylistTracksFromBackend()
+      const autopath = process.env.API_BASE_URL + `api/autoplaylists`
+      axios.get(autopath)
+        .then(function (response) {
+          self.autoPlaylists = response.data
+        }).catch(function (error) {
+          console.log(error)
+        })
     },
     onPlaylistSelected (playlist) {
       this.playlistId = playlist.id
-      this.editablePlaylist = !playlist.auto
       this.$router.push({ path: `/playlists/${this.playlistId}` })
     },
-    editPlaylist (playlist) {
+    onAutoPlaylistSelected (playlist) {
+      this.playlistId = playlist.id
+      this.$router.push({ path: `/autoplaylists/${this.playlistId}` })
+    },
+    onEditPlaylist (playlist) {
       this.selectedPlaylist = playlist
       this.cachedPlaylist = Object.assign({}, this.selectedPlaylist)
       this.editPlaylistModalShow = true
@@ -192,6 +269,9 @@ export default {
         })
       }
     },
+    addPlaylist () {
+      this.newPlaylistModalShow = true
+    },
     onNewPlaylistSubmit () {
       const self = this
       if (this.user) {
@@ -207,11 +287,15 @@ export default {
             })
         })
       }
+    },
+    onNewPlaylistCancel () {
+      this.newPlaylistModalShow = false
     }
   },
   components: {
     PlaylistList,
     PlaylistTrackList,
+    AutoPlaylistTrackList,
     TrackPlayer
   },
   mixins: [

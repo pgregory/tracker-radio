@@ -15,8 +15,20 @@
         </v-layout>
       </v-flex>
       <v-flex sm4>
-        <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
-        <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
+        <v-btn
+          v-bind:disabled="track == null"
+          v-on:click="loadSong(track)"
+          icon
+          flat>
+          <v-icon x-large>play_circle_filled</v-icon>
+        </v-btn>
+        <v-btn
+          v-bind:disabled="track == null"
+          v-on:click="stopSong"
+          icon
+          flat>
+          <v-icon x-large>stop</v-icon>
+        </v-btn>
       </v-flex>
       <v-flex sm2></v-flex>
       <v-flex sm2 ref="monitor-container">

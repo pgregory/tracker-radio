@@ -8,9 +8,10 @@ const routerOptions = [
   { path: '/artists/:id', component: 'Artist' },
   { path: '/login', component: 'Login' },
   { path: '/sign-up', component: 'SignUp' },
-  { path: '/track/:id', component: 'Track' },
+  { name: 'track', path: '/tracks/:id', component: 'Track' },
   { path: '/playlists', component: 'Playlists' },
-  { path: '/playlists/:id', component: 'Playlist' }
+  { path: '/playlists/:id', component: 'Playlist' },
+  { path: '/autoplaylists/:id', component: 'AutoPlaylist' }
 ]
 
 const routes = routerOptions.map(route => {

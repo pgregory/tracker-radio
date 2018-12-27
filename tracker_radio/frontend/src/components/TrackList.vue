@@ -12,10 +12,10 @@
               <td class="track-index">{{ props.index }}</td>
               <td class="track-title">{{ props.item.title }}</td>
               <td class="track-play">
-                <v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon>
+                <v-icon large v-on:click.stop.prevent="onPlayTrack(props.item)">play_arrow</v-icon>
               </td>
               <td class="track-edit">
-                <v-menu bottom left>
+                <v-menu bottom left @click.native.stop.prevent>
                   <v-btn slot="activator"
                          icon>
                     <v-icon>more_vert</v-icon>
@@ -150,7 +150,7 @@ export default {
       this.getPlaylistsFromBackend()
     },
     trackSelected (item, index) {
-      this.$emit('track-selected', item.id)
+      this.$router.push({ name: 'track', params: { id: item.id } })
     },
     onPlayTrack (track) {
       this.$emit('play-track', track.id)

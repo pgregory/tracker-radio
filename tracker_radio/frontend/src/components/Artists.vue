@@ -22,8 +22,8 @@
         </v-flex>
       </v-layout>
       <v-container grid-list-lg>
-        <v-layout row wrap ref="artists">
-          <v-flex v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" >
+        <v-layout row wrap align-start justify-start fill-height ref="artists">
+          <v-flex shrink v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" >
             <v-card
               hover
               width="150"

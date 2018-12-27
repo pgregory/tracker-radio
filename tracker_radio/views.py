@@ -12,6 +12,14 @@ from tracker_radio.models import (Track, TrackSchema, Artist,
         ArtistSchema, Rating, Account, Favourite, Feedback,
         Playlist, PlaylistSchema)
 
+auto_playlists = {
+    'favourites': {
+        'title': 'Favourites',
+        'id': 'favourites',
+        'ref': -1
+    }
+}
+
 @login_manager.user_loader
 def load_user(account_id):
     return Account.query.get(account_id)
@@ -270,6 +278,10 @@ def get_playlists():
     else:
         return jsonify({'success': False}), 400
 
+@app.route('/api/autoplaylists', methods=['GET'])
+def get_auto_playlists():
+    return jsonify([v for k, v in auto_playlists.items()]), 200
+
 @app.route('/api/playlists/<int:playlist_id>', methods=['GET'])
 @token_required
 def get_playlist(user, playlist_id):
@@ -295,10 +307,18 @@ def get_playlist_tracks(playlist_id):
     else:
         return jsonify({'success': False}), 404
 
-@app.route('/api/playlists/<string:playlist_name>/tracks', methods=['GET'])
+@app.route('/api/autoplaylists/<string:playlist_id>', methods=['GET'])
+def get_autoplaylist(playlist_id):
+    if playlist_id in auto_playlists:
+        return jsonify(auto_playlists[playlist_id])
+    else:
+        return jsonify({'success': False, 'msg': 'Not found'}), 404
+
+
+@app.route('/api/autoplaylists/<string:playlist_id>/tracks', methods=['GET'])
 @token_required
-def get_auto_playlist_tracks(user, playlist_name):
-    if playlist_name == 'favourites':
+def get_auto_playlist_tracks(user, playlist_id):
+    if playlist_id == 'favourites':
         schema = TrackSchema(many=True)
         tracks = Track.query.filter(Track.favourited.any(Account.account_id == user.account_id))
         return schema.dumps(tracks)
