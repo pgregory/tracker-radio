@@ -11,9 +11,15 @@
             <tr v-on:click="trackSelected(props.item)">
               <td class="track-index">{{ props.index }}</td>
               <td class="track-title">{{ props.item.title }}</td>
+              <td class="track-artist">{{ props.item.artist.name }}</td>
               <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
               <td class="track-rating">
                 <star-rating v-model="props.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
+              </td>
+              <td class="track-remove">
+                <v-btn v-on:click="onRemoveTrack(props.item.id)" icon>
+                  <v-icon>delete</v-icon>
+                </v-btn>
               </td>
             </tr>
           </template>
@@ -46,6 +52,13 @@ export default {
           value: 'title'
         },
         {
+          text: 'Artist',
+          align: 'left',
+          sortable: true,
+          class: 'track-artist',
+          value: 'artist.name'
+        },
+        {
           text: '',
           sortable: false,
           class: 'track-play'
@@ -55,6 +68,11 @@ export default {
           align: 'right',
           sortable: true,
           value: 'average_rating'
+        },
+        {
+          text: '',
+          sortable: false,
+          class: 'track-remove'
         }
       ]
     }
@@ -125,7 +143,11 @@ export default {
 <style>
 .tracks td.track-title, .tracks th.track-title {
   text-align: left;
-  width: 100%;
+  width: 50%;
+}
+.tracks td.track-artist, .tracks th.track-artist {
+  text-align: left;
+  width: 50%;
 }
 .tracks td.track-index, .tracks th.track-index {
   white-space: nowrap;

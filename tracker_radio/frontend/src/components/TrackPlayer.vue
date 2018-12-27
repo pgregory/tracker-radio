@@ -1,17 +1,29 @@
 <template>
-  <v-layout row fill-height>
-    <v-flex sm4>
-      <h3 v-if="track">{{ track.title }}</h3>
-    </v-flex>
-    <v-flex sm4>
-      <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
-      <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
-    </v-flex>
-    <v-flex sm2></v-flex>
-    <v-flex sm2 ref="monitor-container">
-      <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
-    </v-flex>
-  </v-layout>
+  <v-container fill-height>
+    <v-layout row fill-height>
+      <v-flex sm4>
+        <v-layout fill-height v-if="track">
+          <v-flex class="artist-image">
+            <v-img width="80" height="80" :src="getRandomAvatar(track.artist.id)"></v-img>
+          </v-flex>
+          <v-flex>
+            <v-layout column>
+              <h3 class="track-title">{{ track.title }}</h3>
+              <h4 class="artist-name">{{ track.artist.name }}</h4>
+            </v-layout>
+          </v-flex>
+        </v-layout>
+      </v-flex>
+      <v-flex sm4>
+        <b-button v-bind:disabled="track == null" v-on:click="loadSong(track)">Play</b-button>
+        <b-button v-bind:disabled="track == null" v-on:click="stopSong">Stop</b-button>
+      </v-flex>
+      <v-flex sm2></v-flex>
+      <v-flex sm2 ref="monitor-container">
+        <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
+      </v-flex>
+    </v-layout>
+  </v-container>
 </template>
 
 <script>
@@ -21,19 +33,26 @@ import { state } from 'wetracker/state'
 import { song } from 'wetracker/utils/songmanager'
 import { player } from 'wetracker/audio/player'
 import { connect } from 'wetracker/utils/signal'
+import tinygradient from 'tinygradient'
+import mixins from '../mixins.js'
 
 export default {
   data () {
     return {
-      track: null
+      track: null,
+      analyzerColors: null
     }
   },
   props: {
     user: Object,
     trackId: Number
   },
+  mixins: [
+    mixins
+  ],
   watch: {
     trackId (val, oldval) {
+      this.trackId = val
       this.getTrackData().then(() => {
         this.loadSong(this.track)
       })
@@ -43,7 +62,7 @@ export default {
     async getTrackData () {
       if (this.trackId) {
         const path = process.env.API_BASE_URL + `api/tracks/${this.trackId}`
-        axios.get(path)
+        await axios.get(path)
           .then(response => {
             this.track = response.data
           })
@@ -85,50 +104,40 @@ export default {
     },
     renderMonitors (e) {
       const canvas = this.$refs['monitor']
+      // const numBars = 32
       if (canvas) {
         const ctx = canvas.getContext('2d', { alpha: false })
+        const HEIGHT = canvas.height
+        const WIDTH = canvas.width
+        const topHeight = HEIGHT * 0.75
 
         ctx.fillStyle = '#000'
         ctx.fillRect(0, 0, canvas.width, canvas.height)
 
-        ctx.strokeStyle = '#080'
-        ctx.lineWidth = 1
-        const xBarIncrement = (canvas.width / 10.0)
-        for (var x = 0; x < canvas.width; x += xBarIncrement) {
-          ctx.beginPath()
-          ctx.moveTo(x, 0)
-          ctx.lineTo(x, canvas.height)
-          ctx.stroke()
-        }
-        const yBarIncrement = (canvas.height / 10.0)
-        for (var y = 0; y < canvas.height; y += yBarIncrement) {
-          ctx.beginPath()
-          ctx.moveTo(0, y)
-          ctx.lineTo(canvas.width, y)
-          ctx.stroke()
-        }
-
         if (e && 'masterScope' in e && 'scopeData' in e.masterScope) {
-          ctx.fillStyle = '#0f0'
-          ctx.strokeStyle = '#04AEF7'
-          ctx.lineWidth = 2
-
-          const cho2 = canvas.height / 2
-          const scopeData = e.masterScope.scopeData
+          // const cho2 = canvas.height / 2
+          const freqData = e.masterScope.freqData
           const bufferLength = e.masterScope.bufferLength
+          const barWidth = (WIDTH / bufferLength)
 
-          const sliceWidth = canvas.width * (1.0 / (bufferLength - 1))
-          let x = 0
-          let y = (scopeData[0] / 128.0) * cho2
-
-          ctx.beginPath()
-          ctx.moveTo(x, y)
-          for (let i = 1; i < bufferLength; i += 1) {
-            y = (scopeData[i] / 128.0) * cho2
-            ctx.lineTo(x, y)
-            x += sliceWidth
+          if (this.analyzerColors == null) {
+            const analyzerGradient = tinygradient([
+              '#ff0000',
+              '#ff00ff'
+            ])
+            this.analyzerColors = analyzerGradient.hsv(bufferLength)
           }
-          ctx.stroke()
+
+          let x = 0
+          for (let i = 0; i < bufferLength; i += 1) {
+            let barHeight = ((freqData[i] / 255) * topHeight) * 0.8
+            let col = this.analyzerColors[i].clone()
+            ctx.fillStyle = col.toHexString()
+            ctx.fillRect(x, topHeight - barHeight, barWidth * 0.9, barHeight)
+            ctx.fillStyle = col.darken(20).toHexString()
+            ctx.fillRect(x, topHeight, barWidth * 0.9, barHeight / 3)
+            x += barWidth
+          }
         }
       }
     }
@@ -146,7 +155,6 @@ export default {
     canvas.height = container.offsetHeight
     canvas.style.width = container.offsetWidth
     canvas.style.height = container.offsetHeight
-    console.log(canvas.height)
     state.set({
       transport: {
         masterVolume: -10.0
@@ -158,32 +166,16 @@ export default {
 </script>
 
 <style scoped>
-.monitor-container, .transport-container {
-  position: relative;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+h3.track-title {
+  text-align: left;
 }
-.monitor-container {
-  background-color: black;
-  border: 3px solid lightgrey;
-  border-radius: 5px;
+h4.artist-name {
+  font-size: 18px;
+  text-align: left;
+  color: darkgrey;
 }
-#monitors {
-  flex: auto;
-  margin-top: 10px;
-}
-.monitor-container canvas {
-  border-radius: 5px;
-  height: 100%;
-  width: 100%;
-}
-#transport-row {
-  flex-shrink: 0;
-}
-.panel-body {
-  display: flex;
-  flex-direction: column;
+.artist-image {
+  flex-grow: 0;
+  margin-right: 5px;
 }
 </style>

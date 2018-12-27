@@ -12,18 +12,70 @@
             <v-card
               hover
               width="150"
-              height="100%"
-              v-on:click="onPlaylistSelected(playlist)">
-              <v-img :src="getRandomAvatar()">
+              height="100%">
+              <v-img :src="getRandomAvatar(playlist.id)"
+                v-on:click="onPlaylistSelected(playlist)">
               </v-img>
               <v-card-title>
                 {{ playlist.title }}
               </v-card-title>
+              <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-menu bottom left>
+                  <v-btn slot="activator"
+                         icon>
+                    <v-icon>more_vert</v-icon>
+                  </v-btn>
+                  <v-list>
+                    <v-list-tile
+                         v-on:click="editPlaylist(playlist)">
+                      Edit
+                    </v-list-tile>
+                  </v-list>
+                </v-menu>
+              </v-card-actions>
             </v-card>
           </v-flex>
         </v-layout>
       </v-container>
     </div>
+    <!-- Edit Playlist Modal -->
+    <v-dialog ref="editPlaylistModal"
+      id="edit-playlist-modal"
+      title="Edit Playlist"
+      v-model="editPlaylistModalShow"
+      max-width="600px"
+      v-on:ok="onEditPlaylistSubmit">
+      <v-card v-if="selectedPlaylist">
+        <v-card-title>
+          <span class="headline">Edit Playlist</span>
+        </v-card-title>
+        <v-card-text>
+          <v-container grid-list-md>
+            <v-layout wrap>
+              <v-flex xs12 sm6 md4>
+                <v-text-field
+                  label="Title*" required
+                  v-model="selectedPlaylist.title">
+                </v-text-field>
+              </v-flex>
+            </v-layout>
+          </v-container>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="blue darken-1"
+                 flat v-on:click="onEditPlaylistCancel">
+            Close
+          </v-btn>
+          <v-btn color="blue darken-1"
+                 flat
+                 v-on:click="onEditPlaylistSubmit">
+            Save
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-container>
 </template>
 
@@ -33,6 +85,7 @@ import PlaylistTrackList from './PlaylistTrackList.vue'
 import TrackPlayer from './TrackPlayer.vue'
 import axios from 'axios'
 import firebase from 'firebase'
+import mixins from '../mixins.js'
 
 export default {
   name: 'Playlists',
@@ -45,7 +98,9 @@ export default {
       playlist: [],
       trackId: null,
       editablePlaylist: false,
-      playlists: []
+      playlists: [],
+      editPlaylistModalShow: false,
+      selectedPlaylist: null
     }
   },
   watch: {
@@ -63,7 +118,6 @@ export default {
             { headers: { 'Authorization': 'bearer ' + idToken } })
             .then(function (response) {
               self.playlists = response.data
-              console.log(self.playlists)
             }).catch(function (error) {
               console.log(error)
             })
@@ -98,10 +152,61 @@ export default {
       this.editablePlaylist = !playlist.auto
       this.$router.push({ path: `/playlists/${this.playlistId}` })
     },
-    getRandomAvatar () {
-      var index = Math.ceil(Math.random() * 6)
-      var strIndex = ('000' + index).slice(-3)
-      return `/static/cover-${strIndex}.png`
+    editPlaylist (playlist) {
+      this.selectedPlaylist = playlist
+      this.cachedPlaylist = Object.assign({}, this.selectedPlaylist)
+      this.editPlaylistModalShow = true
+    },
+    onEditPlaylistSubmit () {
+      const self = this
+      if (this.user) {
+        this.user.getIdToken(true).then(function (idToken) {
+          const path = process.env.API_BASE_URL + `api/playlists/${self.selectedPlaylist.id}`
+          axios.patch(path, {
+            'title': self.selectedPlaylist.title
+          }, { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.editPlaylistModalShow = false
+            }).catch(function (error) {
+              console.log(error)
+              self.editPlaylistModalShow = false
+            })
+        })
+      }
+    },
+    onEditPlaylistCancel () {
+      this.selectedPlaylist = Object.assign(this.selectedPlaylist, this.cachedPlaylist)
+      this.editPlaylistModalShow = false
+    },
+    onDeletePlaylist (playlist) {
+      const self = this
+      if (this.user) {
+        this.user.getIdToken(true).then(function (idToken) {
+          const path = process.env.API_BASE_URL + `api/playlists/${playlist.id}`
+          axios.delete(path, { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.getPlaylistsFromBackend()
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
+    },
+    onNewPlaylistSubmit () {
+      const self = this
+      if (this.user) {
+        this.user.getIdToken(true).then(function (idToken) {
+          const path = process.env.API_BASE_URL + `api/playlists`
+          axios.post(path, {
+            'title': self.newPlaylistTitle
+          }, { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.getPlaylistsFromBackend()
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
     }
   },
   components: {
@@ -109,6 +214,9 @@ export default {
     PlaylistTrackList,
     TrackPlayer
   },
+  mixins: [
+    mixins
+  ],
   created () {
     this.getPlaylistsFromBackend()
   }

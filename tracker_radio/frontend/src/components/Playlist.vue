@@ -5,7 +5,7 @@
     <v-container v-if="playlist" grid-list-xl>
       <v-layout row>
         <v-flex sm2>
-          <v-img :src="getRandomAvatar()"></v-img>
+          <v-img :src="getRandomAvatar(playlist.id)"></v-img>
         </v-flex>
         <v-flex sm6>
           <v-layout column fill-height align-start justify-center>
@@ -27,6 +27,7 @@
 <script>
 import axios from 'axios'
 import PlaylistTrackList from './PlaylistTrackList.vue'
+import mixins from '../mixins.js'
 
 export default {
   data () {
@@ -47,6 +48,9 @@ export default {
   components: {
     PlaylistTrackList
   },
+  mixins: [
+    mixins
+  ],
   methods: {
     getPlaylistData () {
       if (this.playlistId) {
@@ -65,11 +69,6 @@ export default {
           })
         }
       }
-    },
-    getRandomAvatar () {
-      var index = Math.ceil(Math.random() * 6)
-      var strIndex = ('000' + index).slice(-3)
-      return `/static/cover-${strIndex}.png`
     },
     trackSelected (trackId) {
       this.$emit('track-selected', trackId)

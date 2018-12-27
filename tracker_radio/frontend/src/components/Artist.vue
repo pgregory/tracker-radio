@@ -3,7 +3,7 @@
     <v-container v-if="artist" grid-list-xl>
       <v-layout row>
         <v-flex sm2>
-          <v-img :src="getRandomAvatar()"></v-img>
+          <v-img :src="getRandomAvatar(artist.id)"></v-img>
         </v-flex>
         <v-flex sm6>
           <v-layout column fill-height align-start justify-center>
@@ -25,6 +25,7 @@
 <script>
 import axios from 'axios'
 import TrackList from './TrackList.vue'
+import mixins from '../mixins.js'
 
 export default {
   data () {
@@ -40,6 +41,9 @@ export default {
   components: {
     TrackList
   },
+  mixins: [
+    mixins
+  ],
   methods: {
     getArtistData () {
       if (this.artistId) {
@@ -52,11 +56,6 @@ export default {
             console.log(error)
           })
       }
-    },
-    getRandomAvatar () {
-      var index = Math.ceil(Math.random() * 6)
-      var strIndex = ('000' + index).slice(-3)
-      return `/static/cover-${strIndex}.png`
     },
     trackSelected (trackId) {
       this.$emit('track-selected', trackId)

@@ -23,6 +23,7 @@
     "lz4-asm": "^0.3.3",
     "tab64": "0.0.1",
     "text-encoding": "^0.7.0",
+    "tinygradient": "^0.4.3",
     "tunajs": "^1.0.2",
     "vue": "^2.5.2",
     "vue-gtm": "^2.0.0",

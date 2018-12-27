@@ -29,7 +29,7 @@
               width="150"
               height="100%"
               v-on:click="onArtistSelected(artist.id)">
-              <v-img :src="getRandomAvatar()">
+              <v-img :src="getRandomAvatar(artist.id)">
               </v-img>
               <v-card-title>
                 {{ artist.name }}
@@ -44,6 +44,7 @@
 
 <script>
 import axios from 'axios'
+import mixins from '../mixins.js'
 // import VueScrollTo from 'vue-scrollto'
 
 export default {
@@ -93,15 +94,13 @@ export default {
     },
     onArtistSelected (artistId) {
       this.$router.push({ path: `/artists/${artistId}` })
-    },
-    getRandomAvatar () {
-      var index = Math.ceil(Math.random() * 6)
-      var strIndex = ('000' + index).slice(-3)
-      return `/static/cover-${strIndex}.png`
     }
   },
   components: {
   },
+  mixins: [
+    mixins
+  ],
   created () {
     this.getArtists()
   }

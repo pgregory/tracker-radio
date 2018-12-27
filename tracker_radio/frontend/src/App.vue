@@ -19,7 +19,7 @@
         v-on:play-track="playingTrackId = $event">
       </router-view>
     </v-content>
-    <v-footer app fixed height="90">
+    <v-footer app fixed height="128" class="raised-footer">
       <TrackPlayer v-bind:user="user" v-bind:trackId="playingTrackId"></TrackPlayer>
     </v-footer>
     <div id="feedback-button" v-b-modal.modal1>
@@ -184,5 +184,10 @@ html body {
   color: black;
   padding: 5px 5px 0 5px;
   border-radius: 5px 5px 0 0;
+}
+.raised-footer {
+  box-shadow: 0 -2px 4px -1px rgba(0,0,0,.2),
+              0 -4px 5px 0 rgba(0,0,0,.14),
+              0 -1px 10px 0 rgba(0,0,0,.12);
 }
 </style>
