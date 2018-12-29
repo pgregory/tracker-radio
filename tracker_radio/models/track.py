@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import func
 from marshmallow import Schema, fields, post_load
 from .artist import Artist, ArtistSchema
+from .favourite import Favourite
 from .rating import Rating
 
 from tracker_radio import db
@@ -30,6 +31,7 @@ class TrackSchema(Schema):
     created_at = fields.DateTime()
     updated_at = fields.DateTime()
     average_rating = fields.Method("get_average_rating")
+    is_favourite_of_current_user = fields.Method("get_favourite")
 
     def get_average_rating(self, obj):
         rating_scores = [r.rating for r in obj.ratings]
@@ -37,6 +39,13 @@ class TrackSchema(Schema):
             return float(sum(rating_scores)) / len(rating_scores)
         else:
             return 0.0
+
+    def get_favourite(self, obj):
+        if 'user' in self.context:
+            favourite = Favourite.query.filter_by(track_id=obj.id, user_id=self.context['user'].account_id).count()
+            if favourite > 0:
+                return True
+        return False
 
     @post_load
     def make_track(self, data):

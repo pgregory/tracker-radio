@@ -6,12 +6,25 @@
       <v-spacer></v-spacer>
       <v-toolbar-items>
         <v-btn flat to="/artists">Artists</v-btn>
-        <v-btn flat to="/playlists">Playlists</v-btn>
+        <v-tooltip bottom v-if="user == null">
+          <v-btn slot="activator" flat>Playlists</v-btn>
+          <span>Login/Sign Up to use Playlists</span>
+        </v-tooltip>
+        <v-btn flat v-if="user != null" to="/playlists">Playlists</v-btn>
+        <v-btn flat v-if="user == null" to="/login">Login/Sign Up</v-btn>
       </v-toolbar-items>
-      <v-avatar color="white" size="40">
-        <b-img v-if="user" :src="user.photoURL"></b-img>
-      </v-avatar>
-      <b-tooltip target="playlistsMenu" v-if="user == null">Login/Sign Up to use Playlists</b-tooltip>
+      <v-menu v-if="user != null" offset-y>
+        <v-btn icon slot="activator">
+          <v-avatar color="white" size="40">
+            <v-img :src="user.photoURL"></v-img>
+          </v-avatar>
+        </v-btn>
+        <v-list>
+          <v-list-tile v-if="user != null" v-on:click="logout">
+            Logout
+          </v-list-tile>
+        </v-list>
+      </v-menu>
     </v-toolbar>
     <v-content id="page">
       <router-view :user="user"
@@ -74,8 +87,6 @@
 </template>
 
 <script>
-import 'bootstrap/dist/css/bootstrap.css'
-import 'bootstrap-vue/dist/bootstrap-vue.css'
 import firebase from 'firebase'
 import axios from 'axios'
 
@@ -200,7 +211,7 @@ html body {
   background-color: white;
 }
 #feedback-button {
-  position: absolute;
+  position: fixed;
   right: 0;
   top: 50%;
   transform: rotate(270deg);

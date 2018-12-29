@@ -19,6 +19,27 @@
           </v-layout>
         </v-flex>
       </v-layout>
+      <v-layout row>
+        <v-flex shrink>
+          <star-rating
+            v-model="track.average_rating"
+            :star-size="20"
+            v-on:rating-selected="setRating($event, track)">
+          </star-rating>
+        </v-flex>
+      </v-layout>
+      <v-layout row>
+        <v-flex shrink>
+          <v-btn
+            icon
+            flat
+            v-on:click.stop="onFavouriteTrack(track)">
+            <v-icon medium :color="track.is_favourite_of_current_user? 'red' : 'grey'">
+              favorite
+            </v-icon>
+          </v-btn>
+        </v-flex>
+      </v-layout>
     </v-container>
   </div>
 </template>
@@ -26,6 +47,7 @@
 <script>
 import axios from 'axios'
 import mixins from '../mixins.js'
+import StarRating from 'vue-star-rating'
 
 export default {
   name: 'Track',
@@ -38,21 +60,52 @@ export default {
       track: null
     }
   },
+  components: {
+    StarRating
+  },
+  watch: {
+    user (val, oldval) {
+      this.getTrackData()
+    }
+  },
   methods: {
     async getTrackData () {
       if (this.trackId) {
         const path = process.env.API_BASE_URL + `api/tracks/${this.trackId}`
-        await axios.get(path)
-          .then(response => {
-            this.track = response.data
+        if (this.user) {
+          const idToken = await this.user.getIdToken(true)
+          await axios.get(path, {
+            headers: { 'Authorization': 'bearer ' + idToken }
           })
-          .catch(error => {
-            console.log(error)
-          })
+            .then(response => {
+              this.track = response.data
+            })
+            .catch(error => {
+              console.log(error)
+            })
+        } else {
+          await axios.get(path)
+            .then(response => {
+              this.track = response.data
+            })
+            .catch(error => {
+              console.log(error)
+            })
+        }
       }
     },
     onPlay () {
       this.$emit('play-track', this.trackId)
+    },
+    onSetRating (rating, track) {
+      this.setRating(rating, track).then(() => {
+        this.getTrackData()
+      })
+    },
+    onFavouriteTrack (track) {
+      this.setFavourite(track).then(() => {
+        this.getTrackData()
+      })
     }
   },
   mixins: [

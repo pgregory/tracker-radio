@@ -143,7 +143,13 @@ def get_artist(artist_id):
 
 @app.route('/api/artists/<int:artist_id>/tracks', methods=['GET'])
 def get_artist_tracks(artist_id):
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
     schema = TrackSchema(many=True)
+    schema.context = { 'user': user }
     artist = Artist.query.filter_by(id=artist_id).first()
     if not artist:
         abort(404)
@@ -158,7 +164,13 @@ def get_tracks():
 
 @app.route('/api/tracks/<int:track_id>', methods=['GET'])
 def get_track(track_id):
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
     schema = TrackSchema()
+    schema.context = {'user': user}
     track = Track.query.filter_by(id=track_id).first()
     if track:
         return schema.dumps(track)
@@ -205,6 +217,16 @@ def favourite_track(user, track_id):
     if not favourite:
         favourite = Favourite(track_id=track_id, user_id=user.account_id)
         db.session.add(favourite)
+        db.session.commit()
+    return jsonify({'success': True}), 201
+
+@app.route('/api/tracks/<int:track_id>/unfavourite', methods=['POST'])
+@token_required
+def unfavourite_track(user, track_id):
+    data = request.json
+    favourite = Favourite.query.filter_by(track_id=track_id, user_id=user.account_id).first()
+    if favourite:
+        db.session.delete(favourite)
         db.session.commit()
     return jsonify({'success': True}), 201
 
@@ -303,6 +325,7 @@ def get_playlist_tracks(playlist_id):
     # TODO: Check ownership.
     if pl:
         schema = TrackSchema(many=True)
+        schema.context = { 'user': user }
         return schema.dumps(pl.tracks)
     else:
         return jsonify({'success': False}), 404
@@ -318,9 +341,15 @@ def get_autoplaylist(playlist_id):
 @app.route('/api/autoplaylists/<string:playlist_id>/tracks', methods=['GET'])
 @token_required
 def get_auto_playlist_tracks(user, playlist_id):
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
     if playlist_id == 'favourites':
         schema = TrackSchema(many=True)
-        tracks = Track.query.filter(Track.favourited.any(Account.account_id == user.account_id))
+        schema.context = { 'user': user }
+        tracks = Track.query.filter(Track.favourited.any(Favourite.user_id == user.account_id))
         return schema.dumps(tracks)
     else:
         return jsonify({'success': False}), 404

@@ -9,7 +9,6 @@
           hide-actions>
           <template slot="items" slot-scope="props">
             <tr v-on:click="trackSelected(props.item)">
-              <td class="track-index">{{ props.index }}</td>
               <td class="track-title">{{ props.item.title }}</td>
               <td class="track-play">
                 <v-icon large v-on:click.stop.prevent="onPlayTrack(props.item)">play_arrow</v-icon>
@@ -37,11 +36,31 @@
                         </v-list-tile>
                       </v-list>
                     </v-menu>
+                    <v-list-tile>
+                      <a :href="getTrackLocation(props.item)" target="_blank">
+                        Open in WeTracker
+                      </a>
+                    </v-list-tile>
                   </v-list>
                 </v-menu>
               </td>
+              <td class="track-favourite">
+                <v-btn
+                  icon
+                  flat
+                  v-on:click.stop="onFavouriteTrack(props.item)">
+                  <v-icon medium :color="props.item.is_favourite_of_current_user? 'red' : 'grey'">
+                    favorite
+                  </v-icon>
+                </v-btn>
+              </td>
               <td class="track-rating">
-                <star-rating v-model="props.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
+                <star-rating
+                  @click.native.prevent.stop
+                  v-model="props.item.average_rating"
+                  :star-size="20"
+                  v-on:rating-selected="setRating($event, props.item)">
+                </star-rating>
               </td>
             </tr>
           </template>
@@ -55,17 +74,13 @@
 import axios from 'axios'
 import StarRating from 'vue-star-rating'
 import firebase from 'firebase'
+import mixins from '../mixins.js'
 
 export default {
   data () {
     return {
       tracks: [],
       headers: [
-        {
-          text: '#',
-          sortable: false,
-          class: 'track-index'
-        },
         {
           text: 'Title',
           align: 'left',
@@ -84,13 +99,19 @@ export default {
           class: 'track-edit'
         },
         {
+          text: '',
+          sortable: false,
+          class: 'track-favourite'
+        },
+        {
           text: 'Average Rating',
           align: 'right',
           sortable: true,
           value: 'average_rating'
         }
       ],
-      playlists: []
+      playlists: [],
+      isFavourites: {}
     }
   },
   props: {
@@ -100,24 +121,42 @@ export default {
   watch: {
     artistId (val, oldval) {
       this.updateArtistTracks(val)
-      // this.$emit('track-selected', null)
     },
     user (val, oldval) {
+      this.updateArtistTracks(val)
       this.updatePlaylists()
     }
   },
+  mixins: [
+    mixins
+  ],
   methods: {
     getArtistTracksFromBackend () {
       if (this.artistId) {
         const path = process.env.API_BASE_URL + `api/artists/` + this.artistId + `/tracks`
-        axios.get(path)
-          .then(response => {
-            this.tracks = response.data
-            this.$emit('num-tracks', this.tracks.length)
+        if (this.user) {
+          var self = this
+          this.user.getIdToken(true).then(function (idToken) {
+            axios.get(path,
+              { headers: { 'Authorization': 'bearer ' + idToken } })
+              .then(response => {
+                self.tracks = response.data
+                self.$emit('num-tracks', self.tracks.length)
+              })
+              .catch(error => {
+                console.log(error)
+              })
           })
-          .catch(error => {
-            console.log(error)
-          })
+        } else {
+          axios.get(path)
+            .then(response => {
+              this.tracks = response.data
+              this.$emit('num-tracks', this.tracks.length)
+            })
+            .catch(error => {
+              console.log(error)
+            })
+        }
       }
     },
     getPlaylistsFromBackend () {
@@ -155,8 +194,13 @@ export default {
     onPlayTrack (track) {
       this.$emit('play-track', track.id)
     },
+    onFavouriteTrack (track) {
+      this.setFavourite(track).then(() => {
+        this.getArtistTracksFromBackend()
+      })
+    },
     setRating (rating, track) {
-      const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
+      const path = process.env.API_BASE_URL + `api/tracks/` + track.id + `/rate`
       const user = firebase.auth().currentUser
       const self = this
       if (user) {
@@ -166,7 +210,7 @@ export default {
             action: 'rate',
             category: 'Track',
             label: 'Track Rated',
-            track_id: track,
+            track_id: track.id,
             rating: rating
           })
           axios.post(path, {
@@ -174,30 +218,6 @@ export default {
           }, { headers: { 'Authorization': 'bearer ' + idToken } })
             .then(function (response) {
               console.log(response)
-            }).catch(function (error) {
-              console.log(error)
-            })
-        })
-      }
-    },
-    setFavourite (track) {
-      const path = process.env.API_BASE_URL + `api/tracks/` + track + `/favourite`
-      const user = firebase.auth().currentUser
-      const self = this
-      if (user) {
-        user.getIdToken(true).then(function (idToken) {
-          console.log(user)
-          self.$gtm.trackEvent({
-            event: 'track-favourite',
-            action: 'favourite',
-            category: 'Track',
-            label: 'Track Favourited',
-            track_id: track
-          })
-          axios.post(path, {},
-            { headers: { 'Authorization': 'bearer ' + idToken } })
-            .then(function (response) {
-              self.isFavourite = true
             }).catch(function (error) {
               console.log(error)
             })
@@ -227,8 +247,12 @@ export default {
             })
         })
       }
+    },
+    getTrackLocation (track) {
+      const playerRoot = 'http://app.wetracker.xyz/#/loadsong?url='
+      var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
+      return playerRoot + url
     }
-
   },
   components: {
     StarRating
@@ -266,6 +290,10 @@ export default {
   width: 1px;
 }
 .tracks td.track-edit, .tracks th.track-edit {
+  white-space: nowrap;
+  width: 1px;
+}
+.tracks td.track-favourite, .tracks th.track-favourite {
   white-space: nowrap;
   width: 1px;
 }

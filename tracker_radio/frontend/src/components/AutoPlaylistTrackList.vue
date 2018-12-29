@@ -13,13 +13,18 @@
               <td class="track-title">{{ props.item.title }}</td>
               <td class="track-artist">{{ props.item.artist.name }}</td>
               <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
+              <td class="track-favourite">
+                <v-btn
+                  icon
+                  flat
+                  v-on:click.stop="onFavouriteTrack(props.item)">
+                  <v-icon medium :color="props.item.is_favourite_of_current_user? 'red' : 'grey'">
+                    favorite
+                  </v-icon>
+                </v-btn>
+              </td>
               <td class="track-rating">
                 <star-rating v-model="props.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
-              </td>
-              <td class="track-remove">
-                <v-btn v-on:click="onRemoveTrack(props.item.id)" icon>
-                  <v-icon>delete</v-icon>
-                </v-btn>
               </td>
             </tr>
           </template>
@@ -33,6 +38,7 @@
 import axios from 'axios'
 import StarRating from 'vue-star-rating'
 import firebase from 'firebase'
+import mixins from '../mixins.js'
 
 export default {
   data () {
@@ -64,6 +70,11 @@ export default {
           class: 'track-play'
         },
         {
+          text: '',
+          sortable: false,
+          class: 'track-favourite'
+        },
+        {
           text: 'Average Rating',
           align: 'right',
           sortable: true,
@@ -81,6 +92,9 @@ export default {
     user: Object,
     playlistId: String
   },
+  mixins: [
+    mixins
+  ],
   watch: {
     user (val, oldval) {
       this.getPlaylistTracksFromBackend()
@@ -132,6 +146,11 @@ export default {
     },
     onPlayTrack (track) {
       this.$emit('play-track', track.id)
+    },
+    onFavouriteTrack (track) {
+      this.setFavourite(track).then(() => {
+        this.getPlaylistTracksFromBackend()
+      })
     }
   },
   components: {
@@ -168,6 +187,10 @@ export default {
   width: 1px;
 }
 .tracks td.track-play, .tracks th.track-play {
+  white-space: nowrap;
+  width: 1px;
+}
+.tracks td.track-favourite, .tracks th.track-favourite {
   white-space: nowrap;
   width: 1px;
 }

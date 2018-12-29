@@ -1,3 +1,6 @@
+import axios from 'axios'
+import firebase from 'firebase'
+
 export default {
   methods: {
     seededRandom: function (seed, min, max) {
@@ -13,6 +16,56 @@ export default {
       var index = Math.ceil(this.seededRandom(id, 0, 6))
       var strIndex = ('000' + index).slice(-3)
       return `/static/cover-${strIndex}.png`
+    },
+    async setFavourite (track) {
+      let op = 'favourite'
+      if (track.is_favourite_of_current_user) {
+        op = 'unfavourite'
+      }
+      const path = process.env.API_BASE_URL + `api/tracks/${track.id}/${op}`
+      const user = firebase.auth().currentUser
+      const self = this
+      if (user) {
+        const idToken = await user.getIdToken(true)
+        self.$gtm.trackEvent({
+          event: 'track-favourite',
+          action: op,
+          category: 'Track',
+          label: 'Track Favourited',
+          track_id: track.id
+        })
+        await axios.post(path, {},
+          { headers: { 'Authorization': 'bearer ' + idToken } })
+          .then(function (response) {
+            console.log(response)
+          }).catch(function (error) {
+            console.log(error)
+          })
+      }
+    },
+    async setRating (rating, track) {
+      const path = process.env.API_BASE_URL + `api/tracks/` + track.id + `/rate`
+      const user = firebase.auth().currentUser
+      const self = this
+      if (user) {
+        const idToken = await user.getIdToken(true)
+        self.$gtm.trackEvent({
+          event: 'track-rate',
+          action: 'rate',
+          category: 'Track',
+          label: 'Track Rated',
+          track_id: track.id,
+          rating: rating
+        })
+        await axios.post(path, {
+          rating: rating
+        }, { headers: { 'Authorization': 'bearer ' + idToken } })
+          .then(function (response) {
+            console.log(response)
+          }).catch(function (error) {
+            console.log(error)
+          })
+      }
     }
   }
 }

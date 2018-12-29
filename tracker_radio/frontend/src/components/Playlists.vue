@@ -167,7 +167,6 @@
 </template>
 
 <script>
-import PlaylistList from './PlaylistList.vue'
 import PlaylistTrackList from './PlaylistTrackList.vue'
 import AutoPlaylistTrackList from './AutoPlaylistTrackList.vue'
 import TrackPlayer from './TrackPlayer.vue'
@@ -293,7 +292,6 @@ export default {
     }
   },
   components: {
-    PlaylistList,
     PlaylistTrackList,
     AutoPlaylistTrackList,
     TrackPlayer
