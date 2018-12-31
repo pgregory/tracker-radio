@@ -45,7 +45,7 @@
                   @click.native.prevent.stop
                   v-model="props.item.average_rating"
                   :star-size="20"
-                  v-on:rating-selected="setRating($event, props.item.id)">
+                  v-on:rating-selected="onSetRating($event, props.item)">
                 </star-rating>
               </td>
               <td class="track-remove">
@@ -186,30 +186,10 @@ export default {
       var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
       return playerRoot + url
     },
-    setRating (rating, track) {
-      const path = process.env.API_BASE_URL + `api/tracks/` + track + `/rate`
-      const user = firebase.auth().currentUser
-      const self = this
-      if (user) {
-        user.getIdToken(true).then(function (idToken) {
-          self.$gtm.trackEvent({
-            event: 'track-rate',
-            action: 'rate',
-            category: 'Track',
-            label: 'Track Rated',
-            track_id: track,
-            rating: rating
-          })
-          axios.post(path, {
-            rating: rating
-          }, { headers: { 'Authorization': 'bearer ' + idToken } })
-            .then(function (response) {
-              console.log(response)
-            }).catch(function (error) {
-              console.log(error)
-            })
-        })
-      }
+    onSetRating (rating, track) {
+      this.setRating(rating, track).then(() => {
+        this.getPlaylistTracksFromBackend()
+      })
     },
     onFavouriteTrack (track) {
       this.setFavourite(track).then(() => {

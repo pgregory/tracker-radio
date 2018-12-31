@@ -24,7 +24,12 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <star-rating v-model="props.item.average_rating" v-bind:star-size="20" v-bind:read-only="true"></star-rating>
+                <star-rating
+                  @click.native.prevent.stop
+                  v-model="props.item.average_rating"
+                  :star-size="20"
+                  v-on:rating-selected="onSetRating($event, props.item)">
+                </star-rating>
               </td>
             </tr>
           </template>
@@ -149,6 +154,11 @@ export default {
     },
     onFavouriteTrack (track) {
       this.setFavourite(track).then(() => {
+        this.getPlaylistTracksFromBackend()
+      })
+    },
+    onSetRating (rating, track) {
+      this.setRating(rating, track).then(() => {
         this.getPlaylistTracksFromBackend()
       })
     }

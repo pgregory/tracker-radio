@@ -59,7 +59,7 @@
                   @click.native.prevent.stop
                   v-model="props.item.average_rating"
                   :star-size="20"
-                  v-on:rating-selected="setRating($event, props.item)">
+                  v-on:rating-selected="onSetRating($event, props.item)">
                 </star-rating>
               </td>
             </tr>
@@ -199,30 +199,10 @@ export default {
         this.getArtistTracksFromBackend()
       })
     },
-    setRating (rating, track) {
-      const path = process.env.API_BASE_URL + `api/tracks/` + track.id + `/rate`
-      const user = firebase.auth().currentUser
-      const self = this
-      if (user) {
-        user.getIdToken(true).then(function (idToken) {
-          self.$gtm.trackEvent({
-            event: 'track-rate',
-            action: 'rate',
-            category: 'Track',
-            label: 'Track Rated',
-            track_id: track.id,
-            rating: rating
-          })
-          axios.post(path, {
-            rating: rating
-          }, { headers: { 'Authorization': 'bearer ' + idToken } })
-            .then(function (response) {
-              console.log(response)
-            }).catch(function (error) {
-              console.log(error)
-            })
-        })
-      }
+    onSetRating (rating, track) {
+      this.setRating(rating, track).then(() => {
+        this.getArtistTracksFromBackend()
+      })
     },
     addTrackToPlaylist (trackId, playlistId) {
       const path = process.env.API_BASE_URL + `api/playlists/${playlistId}/tracks/${trackId}`
