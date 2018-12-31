@@ -4,7 +4,7 @@ from tracker_radio import app, db, login_manager, default_app
 from flask import render_template, request, jsonify, abort, redirect
 from flask_login import LoginManager, login_user, logout_user
 import sqlalchemy
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from random import *
 from firebase_admin import _utils, _token_gen
 
@@ -161,6 +161,19 @@ def get_tracks():
     schema = TrackSchema(many=True)
     tracks = Track.query.order_by(Track.title).fetch(5)
     return schema.dumps(tracks)
+
+@app.route('/api/tracks/popular', methods=['GET'])
+def get_popular_tracks():
+    schema = TrackSchema()
+    rated_tracks = db.session.query(Track, Rating,
+        func.avg(Rating.rating).label('avg_rating'), func.count()). \
+            group_by(Rating.track_id). \
+            order_by(desc('avg_rating')). \
+            filter(Track.id == Rating.track_id)
+    results = []
+    for item in rated_tracks:
+        results.append({'track': schema.dump(item[0]).data, 'avg_rating': item[2], 'rating_count': item[3]})
+    return jsonify(results), 200
 
 @app.route('/api/tracks/<int:track_id>', methods=['GET'])
 def get_track(track_id):

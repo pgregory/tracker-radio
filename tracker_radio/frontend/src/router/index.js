@@ -7,6 +7,7 @@ const routerOptions = [
   { name: 'artist', path: '/artists/:id', component: 'Artist' },
   { path: '/login', component: 'Login' },
   { path: '/sign-up', component: 'SignUp' },
+  { name: 'popular_tracks', path: '/tracks/popular', component: 'PopularTracks' },
   { name: 'track', path: '/tracks/:id', component: 'Track' },
   { path: '/playlists', component: 'Playlists' },
   { path: '/playlists/:id', component: 'Playlist' },

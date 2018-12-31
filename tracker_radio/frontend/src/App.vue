@@ -11,6 +11,7 @@
           <span>Login/Sign Up to use Playlists</span>
         </v-tooltip>
         <v-btn flat v-if="user != null" to="/playlists">Playlists</v-btn>
+        <v-btn flat to="/tracks/popular">Popular Tracks</v-btn>
         <v-btn flat v-if="user == null" to="/login">Login/Sign Up</v-btn>
       </v-toolbar-items>
       <v-menu v-if="user != null" offset-y>
