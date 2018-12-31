@@ -10,7 +10,9 @@
         <v-flex sm6>
           <v-layout column fill-height align-start justify-center>
             <h3 class="track-title">{{ track.title }}</h3>
-            <h4 class="artist-name">{{ track.artist.name }}</h4>
+            <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
+              <h4 class="artist-name">{{ track.artist.name }}</h4>
+            </router-link>
             <v-btn
               icon
               v-on:click="onPlay">
@@ -113,7 +115,11 @@ export default {
   ],
   created () {
     this.trackId = parseInt(this.$route.params.id)
-    this.getTrackData()
+    this.getTrackData().then(() => {
+      if (this.$route.query.play === '1') {
+        this.onPlay()
+      }
+    })
   }
 }
 </script>

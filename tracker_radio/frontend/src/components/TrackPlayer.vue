@@ -9,7 +9,9 @@
           <v-flex>
             <v-layout column>
               <h3 class="track-title">{{ track.title }}</h3>
-              <h4 class="artist-name">{{ track.artist.name }}</h4>
+              <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
+                <h4 class="artist-name">{{ track.artist.name }}</h4>
+              </router-link>
             </v-layout>
           </v-flex>
         </v-layout>
