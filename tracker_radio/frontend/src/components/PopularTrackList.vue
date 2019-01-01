@@ -47,7 +47,8 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
-                <track-favourite :user="user" :track="props.item.track"></track-favourite>
+                <track-favourite :user="user" :track="props.item.track"
+                  @track-changed="updatePopularTracks()"></track-favourite>
               </td>
               <td class="track-rating">
                 <track-rating :user="user" :track="props.item.track"></track-rating>
@@ -185,7 +186,7 @@ export default {
       this.playlists = []
       this.getPlaylistsFromBackend()
     },
-    updatePopularTracks (artistId) {
+    updatePopularTracks () {
       this.getPopularTracksFromBackend()
     },
     updatePlaylists () {

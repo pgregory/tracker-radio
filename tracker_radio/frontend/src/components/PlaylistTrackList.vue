@@ -31,10 +31,12 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
-                <track-favourite :user="user" :track="props.item"></track-favourite>
+                <track-favourite :user="user" :track="props.item"
+                  @track-changed="getPlaylistTracksFromBackend()"></track-favourite>
               </td>
               <td class="track-rating">
-                <track-rating :user="user" :track="props.item"></track-rating>
+                <track-rating :user="user" :track="props.item"
+                  @track-changed="getPlaylistTracksFromBackend()"></track-rating>
               </td>
               <td class="track-remove">
                 <v-btn v-on:click="onRemoveTrack(props.item.id)" icon>

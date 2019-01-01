@@ -22,6 +22,7 @@ export default {
       if (track.is_favourite_of_current_user) {
         op = 'unfavourite'
       }
+      track.is_favourite_of_current_user = !track.is_favourite_of_current_user
       const path = process.env.API_BASE_URL + `api/tracks/${track.id}/${op}`
       const user = firebase.auth().currentUser
       const self = this

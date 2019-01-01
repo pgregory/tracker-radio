@@ -39,7 +39,7 @@ export default {
   methods: {
     onSetRating (rating, track) {
       this.setRating(rating, track).then(() => {
-        this.getArtistTracksFromBackend()
+        this.$emit('track-changed', track.id)
       })
     }
   },

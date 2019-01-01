@@ -45,10 +45,12 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
-                <track-favourite :user="user" :track="props.item"></track-favourite>
+                <track-favourite :user="user" :track="props.item"
+                  @track-changed="getArtistTracksFromBackend()"></track-favourite>
               </td>
               <td class="track-rating">
-                <track-rating :user="user" :track="props.item"></track-rating>
+                <track-rating :user="user" :track="props.item"
+                  @track-changed="getArtistTracksFromBackend()"></track-rating>
               </td>
             </tr>
           </template>

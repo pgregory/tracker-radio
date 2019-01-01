@@ -35,7 +35,9 @@ export default {
   ],
   methods: {
     onFavouriteTrack (track) {
-      this.setFavourite(track)
+      this.setFavourite(track).then(() => {
+        this.$emit('track-changed', track.id)
+      })
     }
   }
 }

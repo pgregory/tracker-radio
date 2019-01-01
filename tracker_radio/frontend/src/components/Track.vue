@@ -23,12 +23,14 @@
       </v-layout>
       <v-layout row>
         <v-flex shrink>
-          <track-rating :user="user" :track="track"></track-rating>
+          <track-rating :user="user" :track="track"
+            @track-changed="getTrackData()"></track-rating>
         </v-flex>
       </v-layout>
       <v-layout row>
         <v-flex shrink>
-          <track-favourite :user="user" :track="track"></track-favourite>
+          <track-favourite :user="user" :track="track"
+            @track-changed="getTrackData()"></track-favourite>
         </v-flex>
       </v-layout>
     </v-container>

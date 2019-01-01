@@ -14,10 +14,12 @@
               <td class="track-artist">{{ props.item.artist.name }}</td>
               <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
               <td class="track-favourite">
-                <track-favourite :user="user" :track="props.item"></track-favourite>
+                <track-favourite :user="user" :track="props.item"
+                  @track-changed="getPlaylistTracksFromBackend()"></track-favourite>
               </td>
               <td class="track-rating">
-                <track-rating :user="user" :track="props.item"></track-rating>
+                <track-rating :user="user" :track="props.item"
+                  @track-changed="getPlaylistTracksFromBackend()"></track-rating>
               </td>
             </tr>
           </template>
@@ -117,7 +119,7 @@ export default {
       }
     },
     trackSelected (item, index) {
-      this.$emit('track-selected', item.id)
+      this.$router.push({ name: 'track', params: { id: item.id } })
     },
     onRemoveTrack (trackId) {
       if (this.playlistId) {
