@@ -164,7 +164,13 @@ def get_tracks():
 
 @app.route('/api/tracks/popular', methods=['GET'])
 def get_popular_tracks():
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
     schema = TrackSchema()
+    schema.context = { 'user': user }
     rated_tracks = db.session.query(Track, Rating,
         func.avg(Rating.rating).label('avg_rating'), func.count()). \
             group_by(Rating.track_id). \
