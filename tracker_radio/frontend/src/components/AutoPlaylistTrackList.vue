@@ -24,12 +24,7 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <star-rating
-                  @click.native.prevent.stop
-                  v-model="props.item.average_rating"
-                  :star-size="20"
-                  v-on:rating-selected="onSetRating($event, props.item)">
-                </star-rating>
+                <track-rating :user="user" :track="props.item"></track-rating>
               </td>
             </tr>
           </template>
@@ -41,7 +36,7 @@
 
 <script>
 import axios from 'axios'
-import StarRating from 'vue-star-rating'
+import TrackRating from './TrackRating.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -156,15 +151,10 @@ export default {
       this.setFavourite(track).then(() => {
         this.getPlaylistTracksFromBackend()
       })
-    },
-    onSetRating (rating, track) {
-      this.setRating(rating, track).then(() => {
-        this.getPlaylistTracksFromBackend()
-      })
     }
   },
   components: {
-    StarRating
+    TrackRating
   },
   created () {
     this.getPlaylistTracksFromBackend()

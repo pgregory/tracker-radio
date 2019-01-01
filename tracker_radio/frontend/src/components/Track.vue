@@ -23,11 +23,7 @@
       </v-layout>
       <v-layout row>
         <v-flex shrink>
-          <star-rating
-            v-model="track.average_rating"
-            :star-size="20"
-            v-on:rating-selected="onSetRating($event, track)">
-          </star-rating>
+          <track-rating :user="user" :track="track"></track-rating>
         </v-flex>
       </v-layout>
       <v-layout row>
@@ -49,7 +45,7 @@
 <script>
 import axios from 'axios'
 import mixins from '../mixins.js'
-import StarRating from 'vue-star-rating'
+import TrackRating from './TrackRating.vue'
 
 export default {
   name: 'Track',
@@ -63,7 +59,7 @@ export default {
     }
   },
   components: {
-    StarRating
+    TrackRating
   },
   watch: {
     user (val, oldval) {
@@ -98,11 +94,6 @@ export default {
     },
     onPlay () {
       this.$emit('play-track', this.trackId)
-    },
-    onSetRating (rating, track) {
-      this.setRating(rating, track).then(() => {
-        this.getTrackData()
-      })
     },
     onFavouriteTrack (track) {
       this.setFavourite(track).then(() => {

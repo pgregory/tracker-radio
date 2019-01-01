@@ -41,12 +41,7 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <star-rating
-                  @click.native.prevent.stop
-                  v-model="props.item.average_rating"
-                  :star-size="20"
-                  v-on:rating-selected="onSetRating($event, props.item)">
-                </star-rating>
+                <track-rating :user="user" :track="props.item"></track-rating>
               </td>
               <td class="track-remove">
                 <v-btn v-on:click="onRemoveTrack(props.item.id)" icon>
@@ -63,7 +58,7 @@
 
 <script>
 import axios from 'axios'
-import StarRating from 'vue-star-rating'
+import TrackRating from './TrackRating.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -186,11 +181,6 @@ export default {
       var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
       return playerRoot + url
     },
-    onSetRating (rating, track) {
-      this.setRating(rating, track).then(() => {
-        this.getPlaylistTracksFromBackend()
-      })
-    },
     onFavouriteTrack (track) {
       this.setFavourite(track).then(() => {
         this.getPlaylistTracksFromBackend()
@@ -198,7 +188,7 @@ export default {
     }
   },
   components: {
-    StarRating
+    TrackRating
   },
   created () {
     this.getPlaylistTracksFromBackend()

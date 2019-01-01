@@ -63,22 +63,7 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <v-tooltip bottom v-if="user == null">
-                  <star-rating
-                    slot="activator"
-                    @click.native.prevent.stop
-                    v-model="props.item.track.average_rating"
-                    :star-size="20"
-                    read-only>
-                  </star-rating>
-                  <span>Login/Sign Up to Rate Tracks</span>
-                </v-tooltip>
-                <star-rating v-else
-                  @click.native.prevent.stop
-                  v-model="props.item.track.average_rating"
-                  :star-size="20"
-                  v-on:rating-selected="onSetRating($event, props.item.track)">
-                </star-rating>
+                <track-rating :user="user" :track="props.item"></track-rating>
               </td>
               <td class="track-votes">{{ props.item.rating_count }}</td>
             </tr>
@@ -91,7 +76,7 @@
 
 <script>
 import axios from 'axios'
-import StarRating from 'vue-star-rating'
+import TrackRating from './TrackRating.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -229,11 +214,6 @@ export default {
         this.getPopularTracksFromBackend()
       })
     },
-    onSetRating (rating, track) {
-      this.setRating(rating, track).then(() => {
-        this.getPopularTracksFromBackend()
-      })
-    },
     addTrackToPlaylist (trackId, playlistId) {
       const path = process.env.API_BASE_URL + `api/playlists/${playlistId}/tracks/${trackId}`
       const user = firebase.auth().currentUser
@@ -265,13 +245,12 @@ export default {
     }
   },
   components: {
-    StarRating
+    TrackRating
   },
   created () {
     this.getPopularTracks()
     this.getPlaylists()
   }
-
 }
 </script>
 
@@ -318,9 +297,5 @@ export default {
 .tracks td.track-votes, .tracks th.track-votes {
   white-space: nowrap;
   width: 1px;
-}
-.tracks td.track-rating .v-tooltip {
-  display: flex;
-  align-items: center;
 }
 </style>

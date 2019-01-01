@@ -62,23 +62,7 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <v-tooltip bottom v-if="user == null">
-                  <star-rating
-                    slot="activator"
-                    @click.native.prevent.stop
-                    v-model="props.item.average_rating"
-                    :star-size="20"
-                    read-only>
-                  </star-rating>
-                  <span>Login/Sign Up to Rate Tracks</span>
-                </v-tooltip>
-                <star-rating v-else
-                  @click.native.prevent.stop
-                  v-model="props.item.average_rating"
-                  :star-size="20"
-                  :read-only="user == null"
-                  v-on:rating-selected="onSetRating($event, props.item)">
-                </star-rating>
+                <track-rating :user="user" :track="props.item"></track-rating>
               </td>
             </tr>
           </template>
@@ -90,7 +74,7 @@
 
 <script>
 import axios from 'axios'
-import StarRating from 'vue-star-rating'
+import TrackRating from './TrackRating.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -217,11 +201,6 @@ export default {
         this.getArtistTracksFromBackend()
       })
     },
-    onSetRating (rating, track) {
-      this.setRating(rating, track).then(() => {
-        this.getArtistTracksFromBackend()
-      })
-    },
     addTrackToPlaylist (trackId, playlistId) {
       const path = process.env.API_BASE_URL + `api/playlists/${playlistId}/tracks/${trackId}`
       const user = firebase.auth().currentUser
@@ -253,7 +232,7 @@ export default {
     }
   },
   components: {
-    StarRating
+    TrackRating
   },
   created () {
     this.getArtistTracks()
@@ -298,9 +277,5 @@ export default {
 .tracks td.track-rating, .tracks th.track-rating {
   display: flex;
   justify-content: flex-end;
-}
-.tracks td.track-rating .v-tooltip {
-  display: flex;
-  align-items: center;
 }
 </style>
