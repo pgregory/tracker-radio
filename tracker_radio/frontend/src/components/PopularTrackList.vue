@@ -6,7 +6,8 @@
           :headers="headers"
           :items="tracks"
           class="elevation-1 tracks"
-          hide-actions>
+          hide-actions
+          disable-initial-sort>
           <template slot="items" slot-scope="props">
             <tr v-on:click="trackSelected(props.item.track)">
               <td class="track-title">{{ props.item.track.title }}</td>
@@ -66,7 +67,7 @@
                   <star-rating
                     slot="activator"
                     @click.native.prevent.stop
-                    v-model="props.item.average_rating"
+                    v-model="props.item.track.average_rating"
                     :star-size="20"
                     read-only>
                   </star-rating>
