@@ -45,7 +45,14 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
+                <v-tooltip bottom v-if="user == null">
+                  <v-btn slot="activator" icon flat @click.stop>
+                    <v-icon medium color="grey">favorite</v-icon>
+                  </v-btn>
+                  <span>Login/Sign Up to Choose Favourites</span>
+                </v-tooltip>
                 <v-btn
+                  v-else
                   icon
                   flat
                   v-on:click.stop="onFavouriteTrack(props.item)">
@@ -55,10 +62,21 @@
                 </v-btn>
               </td>
               <td class="track-rating">
-                <star-rating
+                <v-tooltip bottom v-if="user == null">
+                  <star-rating
+                    slot="activator"
+                    @click.native.prevent.stop
+                    v-model="props.item.average_rating"
+                    :star-size="20"
+                    read-only>
+                  </star-rating>
+                  <span>Login/Sign Up to Rate Tracks</span>
+                </v-tooltip>
+                <star-rating v-else
                   @click.native.prevent.stop
                   v-model="props.item.average_rating"
                   :star-size="20"
+                  :read-only="user == null"
                   v-on:rating-selected="onSetRating($event, props.item)">
                 </star-rating>
               </td>
@@ -280,5 +298,9 @@ export default {
 .tracks td.track-rating, .tracks th.track-rating {
   display: flex;
   justify-content: flex-end;
+}
+.tracks td.track-rating .v-tooltip {
+  display: flex;
+  align-items: center;
 }
 </style>

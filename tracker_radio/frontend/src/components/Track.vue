@@ -26,7 +26,7 @@
           <star-rating
             v-model="track.average_rating"
             :star-size="20"
-            v-on:rating-selected="setRating($event, track)">
+            v-on:rating-selected="onSetRating($event, track)">
           </star-rating>
         </v-flex>
       </v-layout>
