@@ -14,14 +14,7 @@
               <td class="track-artist">{{ props.item.artist.name }}</td>
               <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
               <td class="track-favourite">
-                <v-btn
-                  icon
-                  flat
-                  v-on:click.stop="onFavouriteTrack(props.item)">
-                  <v-icon medium :color="props.item.is_favourite_of_current_user? 'red' : 'grey'">
-                    favorite
-                  </v-icon>
-                </v-btn>
+                <track-favourite :user="user" :track="props.item"></track-favourite>
               </td>
               <td class="track-rating">
                 <track-rating :user="user" :track="props.item"></track-rating>
@@ -37,6 +30,7 @@
 <script>
 import axios from 'axios'
 import TrackRating from './TrackRating.vue'
+import TrackFavourite from './TrackFavourite.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -146,15 +140,11 @@ export default {
     },
     onPlayTrack (track) {
       this.$emit('play-track', track.id)
-    },
-    onFavouriteTrack (track) {
-      this.setFavourite(track).then(() => {
-        this.getPlaylistTracksFromBackend()
-      })
     }
   },
   components: {
-    TrackRating
+    TrackRating,
+    TrackFavourite
   },
   created () {
     this.getPlaylistTracksFromBackend()

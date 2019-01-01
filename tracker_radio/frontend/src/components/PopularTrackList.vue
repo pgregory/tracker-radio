@@ -47,23 +47,10 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
-                <v-tooltip bottom v-if="user == null">
-                  <v-btn slot="activator" icon flat @click.stop>
-                    <v-icon medium color="grey">favorite</v-icon>
-                  </v-btn>
-                  <span>Login/Sign Up to Choose Favourites</span>
-                </v-tooltip>
-                <v-btn v-else
-                  icon
-                  flat
-                  v-on:click.stop="onFavouriteTrack(props.item.track)">
-                  <v-icon medium :color="props.item.track.is_favourite_of_current_user? 'red' : 'grey'">
-                    favorite
-                  </v-icon>
-                </v-btn>
+                <track-favourite :user="user" :track="props.item.track"></track-favourite>
               </td>
               <td class="track-rating">
-                <track-rating :user="user" :track="props.item"></track-rating>
+                <track-rating :user="user" :track="props.item.track"></track-rating>
               </td>
               <td class="track-votes">{{ props.item.rating_count }}</td>
             </tr>
@@ -77,6 +64,7 @@
 <script>
 import axios from 'axios'
 import TrackRating from './TrackRating.vue'
+import TrackFavourite from './TrackFavourite.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -209,11 +197,6 @@ export default {
     onPlayTrack (track) {
       this.$emit('play-track', track.id)
     },
-    onFavouriteTrack (track) {
-      this.setFavourite(track).then(() => {
-        this.getPopularTracksFromBackend()
-      })
-    },
     addTrackToPlaylist (trackId, playlistId) {
       const path = process.env.API_BASE_URL + `api/playlists/${playlistId}/tracks/${trackId}`
       const user = firebase.auth().currentUser
@@ -245,7 +228,8 @@ export default {
     }
   },
   components: {
-    TrackRating
+    TrackRating,
+    TrackFavourite
   },
   created () {
     this.getPopularTracks()

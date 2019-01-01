@@ -28,14 +28,7 @@
       </v-layout>
       <v-layout row>
         <v-flex shrink>
-          <v-btn
-            icon
-            flat
-            v-on:click.stop="onFavouriteTrack(track)">
-            <v-icon medium :color="track.is_favourite_of_current_user? 'red' : 'grey'">
-              favorite
-            </v-icon>
-          </v-btn>
+          <track-favourite :user="user" :track="track"></track-favourite>
         </v-flex>
       </v-layout>
     </v-container>
@@ -46,6 +39,7 @@
 import axios from 'axios'
 import mixins from '../mixins.js'
 import TrackRating from './TrackRating.vue'
+import TrackFavourite from './TrackFavourite.vue'
 
 export default {
   name: 'Track',
@@ -59,7 +53,8 @@ export default {
     }
   },
   components: {
-    TrackRating
+    TrackRating,
+    TrackFavourite
   },
   watch: {
     user (val, oldval) {
@@ -94,11 +89,6 @@ export default {
     },
     onPlay () {
       this.$emit('play-track', this.trackId)
-    },
-    onFavouriteTrack (track) {
-      this.setFavourite(track).then(() => {
-        this.getTrackData()
-      })
     }
   },
   mixins: [

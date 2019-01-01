@@ -31,14 +31,7 @@
                 </v-menu>
               </td>
               <td class="track-favourite">
-                <v-btn
-                  icon
-                  flat
-                  v-on:click.stop="onFavouriteTrack(props.item)">
-                  <v-icon medium :color="props.item.is_favourite_of_current_user? 'red' : 'grey'">
-                    favorite
-                  </v-icon>
-                </v-btn>
+                <track-favourite :user="user" :track="props.item"></track-favourite>
               </td>
               <td class="track-rating">
                 <track-rating :user="user" :track="props.item"></track-rating>
@@ -59,6 +52,7 @@
 <script>
 import axios from 'axios'
 import TrackRating from './TrackRating.vue'
+import TrackFavourite from './TrackFavourite.vue'
 import firebase from 'firebase'
 import mixins from '../mixins.js'
 
@@ -180,15 +174,11 @@ export default {
       const playerRoot = 'http://app.wetracker.xyz/#/loadsong?url='
       var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
       return playerRoot + url
-    },
-    onFavouriteTrack (track) {
-      this.setFavourite(track).then(() => {
-        this.getPlaylistTracksFromBackend()
-      })
     }
   },
   components: {
-    TrackRating
+    TrackRating,
+    TrackFavourite
   },
   created () {
     this.getPlaylistTracksFromBackend()
