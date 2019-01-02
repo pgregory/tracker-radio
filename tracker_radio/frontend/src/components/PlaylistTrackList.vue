@@ -32,11 +32,11 @@
               </td>
               <td class="track-favourite">
                 <track-favourite :user="user" :track="props.item"
-                  @track-changed="getPlaylistTracksFromBackend()"></track-favourite>
+                  @track-changed="onTrackChanged($event)"></track-favourite>
               </td>
               <td class="track-rating">
                 <track-rating :user="user" :track="props.item"
-                  @track-changed="getPlaylistTracksFromBackend()"></track-rating>
+                  @track-changed="onTrackChanged($event)"></track-rating>
               </td>
               <td class="track-remove">
                 <v-btn v-on:click="onRemoveTrack(props.item.id)" icon>
@@ -146,6 +146,20 @@ export default {
             })
         }
       }
+    },
+    onTrackChanged (trackId) {
+      this.getSingleTrackFromBackend(trackId)
+        .then(track => {
+          const t = this.tracks.find(obj => {
+            return obj.id === trackId
+          })
+          if (t) {
+            Object.assign(t, track)
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     trackSelected (item, index) {
       this.$router.push({ name: 'track', params: { id: item.id } })

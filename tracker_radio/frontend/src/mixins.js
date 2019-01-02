@@ -22,7 +22,6 @@ export default {
       if (track.is_favourite_of_current_user) {
         op = 'unfavourite'
       }
-      track.is_favourite_of_current_user = !track.is_favourite_of_current_user
       const path = process.env.API_BASE_URL + `api/tracks/${track.id}/${op}`
       const user = firebase.auth().currentUser
       const self = this
@@ -37,11 +36,6 @@ export default {
         })
         await axios.post(path, {},
           { headers: { 'Authorization': 'bearer ' + idToken } })
-          .then(function (response) {
-            console.log(response)
-          }).catch(function (error) {
-            console.log(error)
-          })
       }
     },
     async setRating (rating, track) {
@@ -61,11 +55,19 @@ export default {
         await axios.post(path, {
           rating: rating
         }, { headers: { 'Authorization': 'bearer ' + idToken } })
-          .then(function (response) {
-            console.log(response)
-          }).catch(function (error) {
-            console.log(error)
-          })
+      }
+    },
+    async getSingleTrackFromBackend (trackId) {
+      const path = process.env.API_BASE_URL + `api/tracks/${trackId}`
+      if (this.user) {
+        // var self = this
+        const idToken = await this.user.getIdToken(true)
+        const res = await axios.get(path,
+          { headers: { 'Authorization': 'bearer ' + idToken } })
+        return res.data
+      } else {
+        const res = await axios.get(path)
+        return res.data
       }
     }
   }

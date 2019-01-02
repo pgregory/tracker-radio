@@ -48,10 +48,11 @@
               </td>
               <td class="track-favourite">
                 <track-favourite :user="user" :track="props.item.track"
-                  @track-changed="updatePopularTracks()"></track-favourite>
+                  @track-changed="onTrackChanged($event)"></track-favourite>
               </td>
               <td class="track-rating">
-                <track-rating :user="user" :track="props.item.track"></track-rating>
+                <track-rating :user="user" :track="props.item.track"
+                  @track-changed="onTrackChanged($event)"></track-rating>
               </td>
               <td class="track-votes">{{ props.item.rating_count }}</td>
             </tr>
@@ -162,6 +163,20 @@ export default {
             console.log(error)
           })
       }
+    },
+    onTrackChanged (trackId) {
+      this.getSingleTrackFromBackend(trackId)
+        .then(track => {
+          const t = this.tracks.find(obj => {
+            return obj.track.id === trackId
+          })
+          if (t) {
+            Object.assign(t.track, track)
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     getPlaylistsFromBackend () {
       const path = process.env.API_BASE_URL + `api/playlists`

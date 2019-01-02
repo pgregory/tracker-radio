@@ -46,11 +46,11 @@
               </td>
               <td class="track-favourite">
                 <track-favourite :user="user" :track="props.item"
-                  @track-changed="getArtistTracksFromBackend()"></track-favourite>
+                  @track-changed="onTrackChanged($event)"></track-favourite>
               </td>
               <td class="track-rating">
                 <track-rating :user="user" :track="props.item"
-                  @track-changed="getArtistTracksFromBackend()"></track-rating>
+                  @track-changed="onTrackChanged($event)"></track-rating>
               </td>
             </tr>
           </template>
@@ -149,6 +149,20 @@ export default {
             })
         }
       }
+    },
+    onTrackChanged (trackId) {
+      this.getSingleTrackFromBackend(trackId)
+        .then(track => {
+          const t = this.tracks.find(obj => {
+            return obj.id === trackId
+          })
+          if (t) {
+            Object.assign(t, track)
+          }
+        })
+        .catch(error => {
+          console.log(error)
+        })
     },
     getPlaylistsFromBackend () {
       const path = process.env.API_BASE_URL + `api/playlists`
