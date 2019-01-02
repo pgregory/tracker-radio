@@ -2,26 +2,38 @@
 
 <template>
   <v-tooltip bottom v-if="user == null">
-    <star-rating
-      slot="activator"
-      @click.native.prevent.stop
-      v-model="track.average_rating"
-      :star-size="20"
-      read-only>
-    </star-rating>
+    <div class="rating"
+      slot="activator">
+      <span class="rating-text">
+        ({{ track.average_rating | roundRating }})
+      </span>
+      <v-rating
+        @click.native.prevent.stop
+        v-model="track.average_rating"
+        :size="20"
+        read-only
+        dense>
+      </v-rating>
+    </div>
     <span>Login/Sign Up to Rate Tracks</span>
   </v-tooltip>
-  <star-rating v-else
-    @click.native.prevent.stop
-    v-model="track.average_rating"
-    :star-size="20"
-    :read-only="user == null"
-    v-on:rating-selected="onSetRating($event, track)">
-  </star-rating>
+  <div v-else class="rating">
+    <span class="rating-text">
+      ({{ track.average_rating | roundRating }})
+    </span>
+    <v-rating
+      v-model="track.average_rating"
+      @click.native.prevent.stop
+      :size="20"
+      hover
+      dense
+      :read-only="user == null"
+      v-on:input="onSetRating($event, track)">
+    </v-rating>
+  </div>
 </template>
 
 <script>
-import StarRating from 'vue-star-rating'
 import mixins from '../mixins.js'
 
 export default {
@@ -38,13 +50,16 @@ export default {
   ],
   methods: {
     onSetRating (rating, track) {
+      console.log(rating)
       this.setRating(rating, track).then(() => {
         this.$emit('track-changed', track.id)
       })
     }
   },
-  components: {
-    StarRating
+  filters: {
+    roundRating (rating) {
+      return rating.toFixed(1)
+    }
   }
 }
 </script>
@@ -53,5 +68,13 @@ export default {
 .v-tooltip {
   display: flex;
   align-items: center;
+}
+.rating {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.rating .v-rating {
+  white-space: nowrap;
 }
 </style>
