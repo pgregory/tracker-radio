@@ -33,6 +33,11 @@
             @track-changed="getTrackData()"></track-favourite>
         </v-flex>
       </v-layout>
+      <v-layout row>
+        <v-flex shrink>
+          <we-tracker :user="user" :track="track"></we-tracker>
+        </v-flex>
+      </v-layout>
     </v-container>
   </div>
 </template>
@@ -42,6 +47,7 @@ import axios from 'axios'
 import mixins from '../mixins.js'
 import TrackRating from './TrackRating.vue'
 import TrackFavourite from './TrackFavourite.vue'
+import WeTracker from './WeTracker.vue'
 
 export default {
   name: 'Track',
@@ -56,7 +62,8 @@ export default {
   },
   components: {
     TrackRating,
-    TrackFavourite
+    TrackFavourite,
+    WeTracker
   },
   watch: {
     user (val, oldval) {

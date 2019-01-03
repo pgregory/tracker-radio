@@ -6,7 +6,9 @@
           :headers="headers"
           :items="tracks"
           class="elevation-1 tracks"
-          hide-actions>
+          :loading="loading"
+          :no-data-text="noDataMessage">
+          <v-progress-linear slot="progress" color="blue" indeterminate></v-progress-linear>
           <template slot="items" slot-scope="props">
             <tr v-on:click="trackSelected(props.item)">
               <td class="track-index">{{ props.index }}</td>
@@ -108,7 +110,9 @@ export default {
           sortable: false,
           class: 'track-remove'
         }
-      ]
+      ],
+      loading: false,
+      noDataMessage: 'Loading Playlist'
     }
   },
   props: {
@@ -120,6 +124,7 @@ export default {
   ],
   methods: {
     getPlaylistTracksFromBackend () {
+      this.loading = true
       if (this.playlistId) {
         const path = process.env.API_BASE_URL + `api/playlists/${this.playlistId}/tracks`
         if (this.user) {
@@ -130,9 +135,11 @@ export default {
               .then(response => {
                 self.tracks = response.data
                 self.$emit('num-tracks', self.tracks.length)
+                self.loading = false
               })
               .catch(error => {
                 console.log(error)
+                self.loading = false
               })
           })
         } else {
@@ -140,9 +147,11 @@ export default {
             .then(response => {
               this.tracks = response.data
               this.$emit('num-tracks', this.tracks.length)
+              this.loading = false
             })
             .catch(error => {
               console.log(error)
+              this.loading = false
             })
         }
       }

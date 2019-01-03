@@ -6,8 +6,10 @@
           :headers="headers"
           :items="tracks"
           class="elevation-1 tracks"
-          hide-actions
+          :loading="loading"
+          :no-data-text="noDataMessage"
           disable-initial-sort>
+          <v-progress-linear slot="progress" color="blue" indeterminate></v-progress-linear>
           <template slot="items" slot-scope="props">
             <tr v-on:click="trackSelected(props.item.track)">
               <td class="track-title">{{ props.item.track.title }}</td>
@@ -118,7 +120,9 @@ export default {
         }
       ],
       playlists: [],
-      isFavourites: {}
+      isFavourites: {},
+      loading: false,
+      noDataMessage: 'Loading Tracks'
     }
   },
   props: {
@@ -139,6 +143,7 @@ export default {
   ],
   methods: {
     getPopularTracksFromBackend () {
+      this.loading = true
       const path = process.env.API_BASE_URL + `api/tracks/popular`
       if (this.user) {
         var self = this
@@ -148,9 +153,11 @@ export default {
             .then(response => {
               self.tracks = response.data
               self.$emit('num-tracks', self.tracks.length)
+              self.loading = false
             })
             .catch(error => {
               console.log(error)
+              self.loading = false
             })
         })
       } else {
@@ -158,9 +165,11 @@ export default {
           .then(response => {
             this.tracks = response.data
             this.$emit('num-tracks', this.tracks.length)
+            this.loading = false
           })
           .catch(error => {
             console.log(error)
+            this.loading = false
           })
       }
     },
