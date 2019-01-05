@@ -1,43 +1,49 @@
 <template>
-  <v-container fill-height>
-    <v-layout row fill-height>
-      <v-flex sm4>
-        <v-layout fill-height v-if="track">
-          <v-flex class="artist-image">
-            <v-img width="80" height="80" :src="getRandomAvatar(track.artist.id)"></v-img>
-          </v-flex>
-          <v-flex>
-            <v-layout column>
-              <h3 class="track-title">{{ track.title }}</h3>
-              <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
-                <h4 class="artist-name">{{ track.artist.name }}</h4>
-              </router-link>
+  <div class="player-container">
+    <v-layout column fill-height>
+      <v-progress-linear v-if="loading" class="ma-0" color="blue" indeterminate></v-progress-linear>
+      <div v-else style="height: 7px;"></div>
+      <v-container fill-height my-1 py-1>
+        <v-layout row fill-height>
+          <v-flex sm4>
+            <v-layout fill-height v-if="track">
+              <v-flex class="artist-image">
+                <v-img width="80" height="80" :src="getRandomAvatar(track.artist.id)"></v-img>
+              </v-flex>
+              <v-flex>
+                <v-layout column>
+                  <h3 class="track-title">{{ track.title }}</h3>
+                  <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
+                    <h4 class="artist-name">{{ track.artist.name }}</h4>
+                  </router-link>
+                </v-layout>
+              </v-flex>
             </v-layout>
           </v-flex>
+          <v-flex sm4>
+            <v-btn
+              v-bind:disabled="track == null"
+              v-on:click="loadSong(track)"
+              icon
+              flat>
+              <v-icon x-large>play_circle_filled</v-icon>
+            </v-btn>
+            <v-btn
+              v-bind:disabled="track == null"
+              v-on:click="stopSong"
+              icon
+              flat>
+              <v-icon x-large>stop</v-icon>
+            </v-btn>
+          </v-flex>
+          <v-flex sm2></v-flex>
+          <v-flex sm2 ref="monitor-container">
+            <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
+          </v-flex>
         </v-layout>
-      </v-flex>
-      <v-flex sm4>
-        <v-btn
-          v-bind:disabled="track == null"
-          v-on:click="loadSong(track)"
-          icon
-          flat>
-          <v-icon x-large>play_circle_filled</v-icon>
-        </v-btn>
-        <v-btn
-          v-bind:disabled="track == null"
-          v-on:click="stopSong"
-          icon
-          flat>
-          <v-icon x-large>stop</v-icon>
-        </v-btn>
-      </v-flex>
-      <v-flex sm2></v-flex>
-      <v-flex sm2 ref="monitor-container">
-        <canvas ref="monitor" width="10" height="10" class="monitor-canvas"></canvas>
-      </v-flex>
+      </v-container>
     </v-layout>
-  </v-container>
+  </div>
 </template>
 
 <script>
@@ -54,7 +60,8 @@ export default {
   data () {
     return {
       track: null,
-      analyzerColors: null
+      analyzerColors: null,
+      loading: false
     }
   },
   props: {
@@ -97,10 +104,12 @@ export default {
         label: 'Play Track',
         track_id: track.id
       })
+      this.loading = true
       var url = this.getTrackLocation(track)
       player.stop()
       song.downloadSong(url).then(() => {
         player.startPlaying()
+        this.loading = false
       })
     },
     stopSong () {
@@ -191,5 +200,9 @@ h4.artist-name {
 .artist-image {
   flex-grow: 0;
   margin-right: 5px;
+}
+.player-container {
+  width: 100%;
+  height: 100%;
 }
 </style>
