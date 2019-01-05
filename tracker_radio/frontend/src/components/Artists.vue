@@ -78,7 +78,7 @@ export default {
       search_string: '',
       rowsPerPageItems: [25, 50, 100],
       loading: false,
-      noDataMessage: "Loading Artists"
+      noDataMessage: 'Loading Artists'
     }
   },
   methods: {
@@ -89,7 +89,7 @@ export default {
       })
     },
     getArtistsFromBackend () {
-      this.loading = true;
+      this.loading = true
       const path = process.env.API_BASE_URL + `api/artists`
       axios.get(path, {
         params: {
@@ -98,7 +98,7 @@ export default {
       })
         .then(response => {
           this.artists = response.data
-          this.loading = false;
+          this.loading = false
         })
         .catch(error => {
           console.log(error)
