@@ -1,7 +1,7 @@
 // Artists.vue
 
 <template>
-  <v-container id="content">
+  <v-container id="content" grid-list-md>
     <div id="artists-panel">
       <v-layout row justify-center>
         <h2>Artists</h2>
@@ -16,27 +16,42 @@
           </v-text-field>
         </v-flex>
         <v-flex xs6>
-          <v-chip dark small v-bind:class="{ active:  letter == current_letter }" v-on:click="selectLetter(letter)" v-for="letter in letters" v-bind:key="letter">
-              <span>{{ letter }}</span>
-          </v-chip>
+          <v-btn-toggle class="letters" v-model="selected_letter" mandatory>
+            <v-btn
+              v-for="letter in letters"
+              v-bind:key="letter"
+              :class="{ letter: true, active: letter == current_letter }"
+              v-on:click="selectLetter(letter)"
+              flat small>
+              {{ letter }}
+            </v-btn>
+          </v-btn-toggle>
         </v-flex>
       </v-layout>
       <v-container grid-list-lg>
-        <v-layout row wrap align-start justify-start fill-height ref="artists">
-          <v-flex shrink v-for="(artist, index) in filteredArtists()" ref="artist" v-bind:key="artist.id" :data-index="index" >
+        <v-progress-linear v-if="loading" color="blue" indeterminate></v-progress-linear>
+        <v-data-iterator
+          :rows-per-page-items="rowsPerPageItems"
+          :items="filteredArtists()"
+          :loading="loading"
+          :no-data-text="noDataMessage"
+          content-tag="v-layout"
+          row
+          wrap>
+          <v-flex slot="item" slot-scope="props">
             <v-card
               hover
               width="150"
               height="100%"
-              v-on:click="onArtistSelected(artist.id)">
-              <v-img :src="getRandomAvatar(artist.id)">
+              v-on:click="onArtistSelected(props.item.id)">
+              <v-img :src="getRandomAvatar(props.item.id)">
               </v-img>
               <v-card-title>
-                {{ artist.name }}
+                {{ props.item.name }}
               </v-card-title>
             </v-card>
           </v-flex>
-        </v-layout>
+        </v-data-iterator>
       </v-container>
     </div>
   </v-container>
@@ -58,8 +73,12 @@ export default {
       artistId: null,
       trackId: null,
       letters: ['All', '0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'],
-      current_letter: 'A',
-      search_string: ''
+      current_letter: 'All',
+      selected_letter: 0,
+      search_string: '',
+      rowsPerPageItems: [25, 50, 100],
+      loading: false,
+      noDataMessage: "Loading Artists"
     }
   },
   methods: {
@@ -70,6 +89,7 @@ export default {
       })
     },
     getArtistsFromBackend () {
+      this.loading = true;
       const path = process.env.API_BASE_URL + `api/artists`
       axios.get(path, {
         params: {
@@ -78,6 +98,7 @@ export default {
       })
         .then(response => {
           this.artists = response.data
+          this.loading = false;
         })
         .catch(error => {
           console.log(error)
@@ -119,84 +140,13 @@ export default {
   position: relative;
   background-color: #fafafa;
 }
-#artists-panel .row.artists {
-  overflow-x: auto;
-  flex-wrap: nowrap;
-}
 #artists-title {
   font-size: 20px;
-}
-.letter {
-  border: 1px solid black;
-  min-width: 0;
-  height: 100%;
-  flex-basis: auto;
-  border-radius: 5px;
-  -webkit-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  -moz-box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  box-shadow: 10px 10px 14px 0px rgba(0,0,0,0.14);
-  padding-right: 0;
-  padding-left: 0;
-  background-color: white;
 }
 .letter.active {
   background-color: darkgrey;
 }
-.letter span {
-  white-space: nowrap;
-}
-#artists-panel .row.artists {
-  min-height: 200px;
-  padding-bottom: 10px;
-  padding-top: 10px;
-}
-#prev-button, #next-button {
-  position: absolute;
-  top: 50%;
-  font-size: 10px;
-  color: rgba(64,64,64,1.0);
-  background-color: rgba(255,255,255,0.8);
-  border-radius: 50%;
-  margin: auto;
-  width: 3rem;
-  height: 3rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-#prev-button {
-  left: 5px;
-}
-#next-button {
-  right: 5px;
-}
-.artist {
-  min-width: 200px;
-  /* margin: 5px; */
-  max-width: 200px;
-}
-.artist-container {
-  position: absolute;
-  top: 5px;
-  bottom: 0;
-  right: 0;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-bottom: 0;
-  width: 100%;
-}
-#track-panel {
-  flex: auto;
-  display: flex;
-  flex-direction: row;
-  min-height: 0;
-  margin-bottom: 10px;
-}
-#track-panel .row {
-  flex: auto;
-}
-.panel {
-  height: 100%;
+.letters {
+  flex-wrap: wrap;
 }
 </style>
