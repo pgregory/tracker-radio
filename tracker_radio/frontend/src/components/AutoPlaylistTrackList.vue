@@ -14,7 +14,7 @@
               <td class="track-index">{{ props.index }}</td>
               <td class="track-title">{{ props.item.title }}</td>
               <td class="track-artist">{{ props.item.artist.name }}</td>
-              <td class="track-play"><v-icon large v-on:click="onPlayTrack(props.item)">play_arrow</v-icon></td>
+              <td class="track-play"><v-icon large v-on:click.stop.prevent="onPlayTrack(props.item)">play_arrow</v-icon></td>
               <td class="track-favourite">
                 <track-favourite :user="user" :track="props.item"
                   @track-changed="onTrackChanged($event)"></track-favourite>
