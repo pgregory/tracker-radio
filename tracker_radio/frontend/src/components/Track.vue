@@ -68,7 +68,15 @@ export default {
   watch: {
     user (val, oldval) {
       this.getTrackData()
+    },
+    trackId (val, oldval) {
+      this.getTrackData()
     }
+  },
+  beforeRouteUpdate (to, from, next) {
+    this.trackId = to.params.id
+    this.getTrackData()
+    next()
   },
   methods: {
     async getTrackData () {

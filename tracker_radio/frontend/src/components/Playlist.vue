@@ -62,7 +62,6 @@ export default {
               { headers: { 'Authorization': 'bearer ' + idToken } })
               .then(response => {
                 self.playlist = response.data
-                console.log(this.playlist)
               }).catch(error => {
                 console.log(error)
               })

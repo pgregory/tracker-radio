@@ -12,6 +12,7 @@
         </v-tooltip>
         <v-btn flat v-if="user != null" to="/playlists">Playlists</v-btn>
         <v-btn flat to="/tracks/popular">Popular Tracks</v-btn>
+        <v-btn flat v-on:click="onRandomTrack()">Random Track</v-btn>
         <v-btn flat v-if="user == null" to="/login">Login/Sign Up</v-btn>
       </v-toolbar-items>
       <v-menu v-if="user != null" offset-y>
@@ -174,6 +175,25 @@ export default {
       evt.preventDefault()
       this.feedbackEmail = ''
       this.feedbackContent = ''
+    },
+    onRandomTrack () {
+      const path = process.env.API_BASE_URL + `api/tracks/random`
+      const user = firebase.auth().currentUser
+      if (user) {
+        var self = this
+        user.getIdToken(true).then(function (idToken) {
+          axios.get(path,
+            { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.$router.push({ name: 'track', params: { id: response.data.id } })
+            })
+        })
+      } else {
+        axios.get(path)
+          .then(function (response) {
+            this.$router.push({ name: 'track', params: { id: response.data.id } })
+          })
+      }
     }
   }
 }

@@ -10,7 +10,7 @@ from firebase_admin import _utils, _token_gen
 
 from tracker_radio.models import (Track, TrackSchema, Artist, 
         ArtistSchema, Rating, Account, Favourite, Feedback,
-        Playlist, PlaylistSchema)
+        Playlist, PlaylistSchema, Problem)
 
 auto_playlists = {
     'favourites': {
@@ -180,6 +180,21 @@ def get_popular_tracks():
     for item in rated_tracks:
         results.append({'track': schema.dump(item[0]).data, 'avg_rating': item[2], 'rating_count': item[3]})
     return jsonify(results), 200
+
+@app.route('/api/tracks/random', methods=['GET'])
+def get_random_track():
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
+    schema = TrackSchema()
+    schema.context = { 'user': user }
+    query = db.session.query(Track)
+
+    rowCount = int(query.count())
+    track = query.offset(int(randrange(rowCount))).first() 
+    return schema.dumps(track)
 
 @app.route('/api/tracks/<int:track_id>', methods=['GET'])
 def get_track(track_id):
@@ -413,6 +428,23 @@ def feedback():
     if user:
         feedback.user_id = user.account_id
     db.session.add(feedback)
+    db.session.commit()
+    return jsonify({'success': True}), 200
+
+@app.route('/api/problem', methods=['POST'])
+def problem():
+    try:
+        user = get_user_from_token(request)
+    except AuthenticationError:
+        user = None
+
+    data = request.json
+    problem = Problem(content=data['content'])
+    if 'email' in data:
+        problem.email = data['email']
+    if user:
+        problem.user_id = user.account_id
+    db.session.add(problem)
     db.session.commit()
     return jsonify({'success': True}), 200
 

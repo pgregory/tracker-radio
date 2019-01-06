@@ -5,3 +5,4 @@ from .account import Account
 from .favourite import Favourite
 from .feedback import Feedback
 from .playlist import Playlist, PlaylistSchema
+from .problem import Problem

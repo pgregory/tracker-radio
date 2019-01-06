@@ -3,6 +3,19 @@
     <v-layout column fill-height>
       <v-progress-linear v-if="loading" class="ma-0" color="blue" indeterminate></v-progress-linear>
       <div v-else style="height: 7px;"></div>
+      <v-snackbar
+        v-model="errorAlert"
+        bottom
+        :timeout="6000"
+        multiLine
+        color="error">
+        Error loading track. The Tracker Radio team have been informed. Sorry for any inconvenience.
+        <v-btn
+          flat
+          @click="errorAlert = false">
+          Close
+        </v-btn>
+      </v-snackbar>
       <v-container fill-height my-1 py-1>
         <v-layout row fill-height>
           <v-flex sm4>
@@ -48,6 +61,7 @@
 
 <script>
 import axios from 'axios'
+import firebase from 'firebase'
 
 import { state } from 'wetracker/state'
 import { song } from 'wetracker/utils/songmanager'
@@ -61,7 +75,8 @@ export default {
     return {
       track: null,
       analyzerColors: null,
-      loading: false
+      loading: false,
+      errorAlert: false
     }
   },
   props: {
@@ -109,6 +124,10 @@ export default {
       player.stop()
       song.downloadSong(url).then(() => {
         player.startPlaying()
+        this.loading = false
+      }).catch(error => {
+        this.errorAlert = true
+        this.submitProblemTrack(error)
         this.loading = false
       })
     },
@@ -162,6 +181,35 @@ export default {
             x += barWidth
           }
         }
+      }
+    },
+    submitProblemTrack (msg) {
+      const path = process.env.API_BASE_URL + `api/problem`
+      const user = firebase.auth().currentUser
+      if (user) {
+        var self = this
+        user.getIdToken(true).then(function (idToken) {
+          axios.post(path, {
+            email: self.user.email,
+            content: JSON.stringify({
+              msg: msg,
+              trackId: self.trackId
+            })
+          }, { headers: { 'Authorization': 'bearer ' + idToken } }).then(function (response) {
+            console.log(response)
+            self.problemModalShow = false
+          })
+        })
+      } else {
+        axios.post(path, {
+          content: JSON.stringify({
+            msg: msg,
+            trackId: self.trackId
+          })
+        }).then(function (response) {
+          console.log(response)
+          self.problemModalShow = false
+        })
       }
     }
   },
