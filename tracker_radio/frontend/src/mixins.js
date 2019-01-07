@@ -69,6 +69,11 @@ export default {
         const res = await axios.get(path)
         return res.data
       }
+    },
+    getWeTrackerLink (track) {
+      const playerRoot = 'http://app.wetracker.xyz/#/loadsong?url='
+      var url = encodeURI('https://modland.com/pub/modules/Fasttracker 2/' + track.location)
+      return playerRoot + url
     }
   }
 }

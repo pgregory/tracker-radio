@@ -30,7 +30,39 @@
       <v-layout row>
         <v-flex shrink>
           <track-favourite :user="user" :track="track"
-            @track-changed="getTrackData()"></track-favourite>
+            @track-changed="getTrackData()">
+          </track-favourite>
+        </v-flex>
+        <v-flex shrink>
+          <v-menu bottom left @click.native.stop.prevent>
+            <v-btn slot="activator"
+                    icon>
+              <v-icon>more_vert</v-icon>
+            </v-btn>
+            <v-list dense>
+              <v-menu offset-x open-on-hover>
+                <v-list-tile slot="activator">
+                  <v-list-tile-title>Add to Playlist</v-list-tile-title>
+                  <v-list-tile-action class="justify-end">
+                    <v-icon>play_arrow</v-icon>
+                  </v-list-tile-action>
+                </v-list-tile>
+                <v-list dense>
+                  <v-list-tile
+                    v-for="playlist in playlists"
+                    v-bind:key="playlist.id"
+                    v-on:click="addTrackToPlaylist(track.id, playlist.id)">
+                      {{ playlist.title }}
+                  </v-list-tile>
+                </v-list>
+              </v-menu>
+              <v-list-tile>
+                <a :href="getWeTrackerLink(track)" target="_blank">
+                  Open in WeTracker
+                </a>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
         </v-flex>
       </v-layout>
       <v-layout row>
@@ -57,7 +89,8 @@ export default {
   data () {
     return {
       trackId: null,
-      track: null
+      track: null,
+      playlists: []
     }
   },
   components: {
@@ -104,6 +137,21 @@ export default {
         }
       }
     },
+    getPlaylistsFromBackend () {
+      const path = process.env.API_BASE_URL + `api/playlists`
+      const self = this
+      if (this.user) {
+        this.user.getIdToken(true).then(function (idToken) {
+          axios.get(path,
+            { headers: { 'Authorization': 'bearer ' + idToken } })
+            .then(function (response) {
+              self.playlists = response.data
+            }).catch(function (error) {
+              console.log(error)
+            })
+        })
+      }
+    },
     onPlay () {
       this.$emit('play-track', this.trackId)
     }
@@ -118,6 +166,7 @@ export default {
         this.onPlay()
       }
     })
+    this.getPlaylistsFromBackend()
   }
 }
 </script>
