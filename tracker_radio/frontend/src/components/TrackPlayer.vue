@@ -21,11 +21,15 @@
           <v-flex sm4>
             <v-layout fill-height v-if="track">
               <v-flex class="artist-image">
-                <v-img width="80" height="80" :src="getRandomAvatar(track.artist.id)"></v-img>
+                <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
+                  <v-img width="80" height="80" :src="getRandomAvatar(track.artist.id)"></v-img>
+                </router-link>
               </v-flex>
               <v-flex>
                 <v-layout column>
-                  <h3 class="track-title">{{ track.title }}</h3>
+                  <router-link :to="{ name: 'track', params: { id: track.id } }">
+                    <h3 class="track-title">{{ track.title }}</h3>
+                  </router-link>
                   <router-link :to="{ name: 'artist', params: { id: track.artist.id } }">
                     <h4 class="artist-name">{{ track.artist.name }}</h4>
                   </router-link>
